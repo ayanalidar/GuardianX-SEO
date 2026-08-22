@@ -18,7 +18,7 @@ export function ScoreRing({
 
   return (
     <div
-      className="relative inline-flex items-center justify-center"
+      className="relative inline-flex items-center justify-center rf-ring-glow"
       style={{ width: size, height: size }}
     >
       <svg width={size} height={size} className="-rotate-90">

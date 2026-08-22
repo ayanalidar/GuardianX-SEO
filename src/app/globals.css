@@ -387,3 +387,86 @@
   background: linear-gradient(90deg, transparent, var(--primary), transparent);
   border-radius: 1px;
 }
+
+/* ---------- Round 3 polish ---------- */
+
+/* Glassmorphic tooltip enhancement */
+[data-radix-popper-content-wrapper] [data-state="delayed-open"],
+[data-radix-popper-content-wrapper] [data-state="instant-open"] {
+  backdrop-filter: blur(12px) saturate(180%) !important;
+  background: oklch(1 0 0 / 0.92) !important;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06) !important;
+  border: 1px solid oklch(0.91 0.01 160 / 0.6) !important;
+}
+.dark [data-radix-popper-content-wrapper] [data-state="delayed-open"],
+.dark [data-radix-popper-content-wrapper] [data-state="instant-open"] {
+  background: oklch(0.2 0.02 165 / 0.92) !important;
+  border-color: oklch(1 0 0 / 0.1) !important;
+}
+
+/* Tab content fade transition */
+[data-state="active"][role="tabpanel"] {
+  animation: rf-tab-fade 0.35s ease-out;
+}
+@keyframes rf-tab-fade {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Loading reveal sequence for dashboard */
+@keyframes rf-loading-reveal {
+  0% { opacity: 0; transform: translateY(12px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+.rf-loading-reveal {
+  animation: rf-loading-reveal 0.5s ease-out both;
+}
+
+/* Glassmorphic card variant */
+.rf-card-glass {
+  background: oklch(1 0 0 / 0.6);
+  backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid oklch(0.91 0.01 160 / 0.5);
+}
+.dark .rf-card-glass {
+  background: oklch(0.2 0.02 165 / 0.6);
+  border-color: oklch(1 0 0 / 0.08);
+}
+
+/* Animated gradient ring (for score rings on hover) */
+.rf-ring-glow {
+  filter: drop-shadow(0 0 8px oklch(0.62 0.14 158 / 0.3));
+  transition: filter 0.3s;
+}
+.rf-ring-glow:hover {
+  filter: drop-shadow(0 0 14px oklch(0.62 0.14 158 / 0.5));
+}
+
+/* Pulse for live indicators */
+@keyframes rf-live-pulse {
+  0%, 100% { opacity: 1; box-shadow: 0 0 0 0 oklch(0.62 0.14 158 / 0.6); }
+  50% { opacity: 0.8; box-shadow: 0 0 0 6px oklch(0.62 0.14 158 / 0); }
+}
+.rf-live-pulse {
+  animation: rf-live-pulse 2s ease-in-out infinite;
+}
+
+/* Number roll animation for changing values */
+@keyframes rf-roll {
+  0% { transform: translateY(0); }
+  50% { transform: translateY(-50%); }
+  100% { transform: translateY(0); }
+}
+
+/* Subtle grain texture for hero sections */
+.rf-grain {
+  position: relative;
+}
+.rf-grain::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.025;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' /%3E%3C/svg%3E");
+}

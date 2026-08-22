@@ -274,3 +274,59 @@ Stage Summary:
 - Real geo SVG for rank map.
 - Scheduled email digests for alerts.
 - Multi-company trend overlay in compare view.
+
+---
+Task ID: 14 (webDevReview round 3 — command palette, SEO forecasting, styling polish)
+Agent: main (Z.ai Code) — cron-triggered review
+Task: Assess project status, perform QA, fix bugs, advance with new features + styling polish.
+
+## Current Project Status / Assessment
+- Project is stable: marketing site (4 pages), 18-tab dashboard, client portal, 10+ advanced feature modules, all lint-clean.
+- QA via agent-browser: all 18 tabs render without errors, marketing flows work, mobile has no overflow.
+- No bugs found — focused on new features + polish.
+
+## Current Goals / Completed Modifications / Verification Results
+
+Work Log:
+- Built **Command Palette** (`command-palette.tsx`):
+  - ⌘K / Ctrl+K global shortcut opens a quick-action launcher.
+  - Groups actions: Navigation (Home/Industries/Capabilities/Login/Dashboard), Actions (Onboard Client, Compare, Notifications), Companies (quick-open up to 50 companies).
+  - Fuzzy filter by label + keywords + group; keyboard nav (↑↓ to move, ↵ to select, ESC to close); footer with result count.
+  - Fixed React 19 set-state-in-effect lint violation using the render-phase "store previous value in state" pattern.
+- Built **SEO Forecasting** (`/api/companies/[id]/forecast` + `features/seo-forecast.tsx`):
+  - API: computes linear projections from 14-day trend for traffic/keywords/position/authority at 30/60/90 days; then calls LLM for a narrative (summary, confidence, key drivers, risks, recommendations).
+  - UI: "Generate Forecast" button → AI Forecast Summary card with confidence badge; projection table (Now/+30d/+60d/+90d with delta %); 3-column Key Drivers / Risks / Recommendations cards.
+  - Verified: POST 200 in 4.5s; LLM returned "ShopMax is projected to experience 131% organic traffic growth from 6.5M to 15M visits over 90 days...".
+  - Added as a new "Forecast" tab (dashboard now has 18 tabs).
+- Added **styling polish** to `globals.css`:
+  - Glassmorphic tooltip enhancement (backdrop-blur + saturate on all Radix popovers).
+  - Tab content fade transition (`rf-tab-fade` animation on tabpanel).
+  - Loading reveal sequence (`rf-loading-reveal`).
+  - Glassmorphic card variant (`rf-card-glass`).
+  - Animated gradient ring glow (`rf-ring-glow`) — applied to ScoreRing.
+  - Live pulse indicator (`rf-live-pulse`).
+  - Subtle grain texture for hero sections (`rf-grain`) — applied to marketing hero.
+  - Number roll animation (`rf-roll`).
+- Applied: score ring now has glow drop-shadow on hover; marketing hero has subtle grain texture.
+
+Verification:
+- Command Palette: ⌘K opens it, typing "shop" filters to "Open ShopMax", ESC closes.
+- SEO Forecast: generates full AI narrative + projection table + drivers/risks/recommendations (POST 4.5s).
+- All 18 tabs render without errors.
+- Mobile: no horizontal overflow. Lint: clean (0 errors). No console/page errors.
+
+Stage Summary:
+- **2 new features**: Command Palette (⌘K), SEO Forecasting (AI-powered 90-day projections).
+- **1 new API route**: `POST /api/companies/[id]/forecast`.
+- **Dashboard tabs**: 17 → 18 (added Forecast).
+- **Styling**: glassmorphic tooltips, tab fade transitions, ring glow, grain texture, loading reveal.
+- **Lint**: clean. **Verification**: all tested via agent-browser.
+
+## Unresolved Issues / Risks + Next-phase Recommendations
+- Saved Views / Bookmarks (persist tab+company combos) was planned but deferred.
+- Client portal could gain its own Forecast + Landscape radar.
+- Real NextAuth authentication (currently mock sign-in).
+- d3-force for larger internal link graphs.
+- Real geo SVG for rank map.
+- Scheduled email digests for alerts + forecast summaries.
+- Multi-company trend overlay in compare view.

@@ -48,7 +48,7 @@ export function MarketingHome({
   return (
     <div>
       {/* HERO */}
-      <section className="relative overflow-hidden">
+      <section className="relative overflow-hidden rf-grain">
         <CinematicBackground variant="mesh" />
         <div className="relative z-10 mx-auto max-w-[1200px] px-4 md:px-6 pt-20 pb-24 text-center">
           <motion.div

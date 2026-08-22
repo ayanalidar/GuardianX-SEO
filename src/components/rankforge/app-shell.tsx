@@ -9,6 +9,7 @@ import { CompanyDetail } from "./company-detail";
 import { SearchDialog } from "./search-dialog";
 import { CompareView, CompareBar } from "./compare-view";
 import { OnboardingWizard } from "./onboarding-wizard";
+import { CommandPalette } from "./command-palette";
 import { MarketingSite } from "./marketing/marketing-site";
 import { useNav } from "@/store/nav";
 import { useFetch } from "@/lib/seo/hooks";
@@ -76,6 +77,7 @@ export function AppShell() {
         <MarketingSite domains={domains} loading={loading} />
         <SearchDialog />
         <OnboardingWizard />
+        <CommandPalette domains={domains} />
       </>
     );
   }
@@ -112,6 +114,7 @@ export function AppShell() {
       <SearchDialog />
       <CompareBar domains={domains} />
       <OnboardingWizard />
+      <CommandPalette domains={domains} />
     </div>
   );
 }

@@ -28,6 +28,7 @@ import { CompetitorAlerts } from "./features/competitor-alerts";
 import { ContentBriefGenerator } from "./features/content-brief-generator";
 import { CannibalizationDetector } from "./features/cannibalization-detector";
 import { CompetitiveRadar } from "./features/competitive-radar";
+import { SeoForecast } from "./features/seo-forecast";
 import { DomainIcon } from "./icons";
 import { scoreGrade } from "@/lib/seo/score";
 import {
@@ -278,6 +279,9 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
           <TabsTrigger value="ai" className="gap-1.5">
             <Bot className="h-3.5 w-3.5" /> AI Insights
           </TabsTrigger>
+          <TabsTrigger value="forecast" className="gap-1.5">
+            <TrendingUp className="h-3.5 w-3.5" /> Forecast
+          </TabsTrigger>
           <TabsTrigger value="timeline" className="gap-1.5">
             <Activity className="h-3.5 w-3.5" /> Timeline
           </TabsTrigger>
@@ -396,6 +400,10 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
 
         <TabsContent value="ai">
           <AiInsightsPanel companyId={company.id} />
+        </TabsContent>
+
+        <TabsContent value="forecast">
+          <SeoForecast companyId={company.id} />
         </TabsContent>
 
         <TabsContent value="timeline" className="space-y-4">
