@@ -30,7 +30,7 @@ export async function GET(req: NextRequest) {
 
   const results = await Promise.all(
     ordered.map(async (c) => {
-      const [latest, first, kwCount, blCount, issueCount, topKeywords] =
+      const [latest, first, kwCount, blCount, issueCount, topKeywords, metrics] =
         await Promise.all([
           db.seoMetric.findFirst({
             where: { companyId: c.id },
@@ -47,6 +47,11 @@ export async function GET(req: NextRequest) {
             where: { companyId: c.id },
             orderBy: { position: "asc" },
             take: 5,
+          }),
+          db.seoMetric.findMany({
+            where: { companyId: c.id },
+            orderBy: { date: "asc" },
+            select: { date: true, organicTraffic: true, visibilityScore: true, avgPosition: true, domainAuthority: true },
           }),
         ]);
       const [issues, keywords, backlinks] = await Promise.all([
@@ -68,6 +73,7 @@ export async function GET(req: NextRequest) {
         issueCount,
         seoScore,
         trafficDelta: Math.round(trafficDelta * 10) / 10,
+        metrics,
       };
     })
   );

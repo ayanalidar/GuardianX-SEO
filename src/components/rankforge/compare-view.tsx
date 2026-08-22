@@ -13,6 +13,11 @@ import {
   ArrowLeft, GitCompare, Trophy, TrendingUp, Activity,
   KeyRound, Link2, Gauge, Eye, X, Crown, Minus,
 } from "lucide-react";
+import {
+  ResponsiveContainer, LineChart, Line, XAxis, YAxis,
+  CartesianGrid, Tooltip, Legend,
+} from "recharts";
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 
 type CompareResult = {
@@ -25,6 +30,7 @@ type CompareResult = {
     issueCount: number;
     seoScore: { total: number; breakdown: { label: string; score: number; weight: number }[] };
     trafficDelta: number;
+    metrics: Array<{ date: string; organicTraffic: number; visibilityScore: number; avgPosition: number; domainAuthority: number }>;
   }>;
 };
 
@@ -135,6 +141,9 @@ export function CompareView({ companyIds }: { companyIds: string[] }) {
           );
         })}
       </div>
+
+      {/* Trend overlay chart */}
+      <TrendOverlay companies={companies} />
 
       {/* KPI comparison rows */}
       <Card>
@@ -419,5 +428,88 @@ export function CompareBar({ domains }: { domains: DomainWithCompanies[] }) {
         )}
       </div>
     </div>
+  );
+}
+
+// ---------- Multi-company trend overlay chart ----------
+const TREND_COLORS = ["#10b981", "#0ea5e9", "#f59e0b", "#8b5cf6"];
+const TREND_METRICS = [
+  { key: "organicTraffic", label: "Organic Traffic", format: (v: number) => formatNumber(v) },
+  { key: "visibilityScore", label: "Visibility Score", format: (v: number) => v.toFixed(1) + "%" },
+  { key: "avgPosition", label: "Avg Position", format: (v: number) => "#" + v.toFixed(1) },
+  { key: "domainAuthority", label: "Domain Authority", format: (v: number) => v.toFixed(1) },
+] as const;
+
+function TrendOverlay({ companies }: { companies: CompareResult["companies"] }) {
+  const [activeMetric, setActiveMetric] = useState<(typeof TREND_METRICS)[number]["key"]>("organicTraffic");
+  const cfg = TREND_METRICS.find((m) => m.key === activeMetric)!;
+
+  // Build chart data — use first company's dates as x-axis
+  const data: Array<Record<string, number | string>> = [];
+  if (companies.length > 0 && companies[0].metrics) {
+    companies[0].metrics.forEach((m, i) => {
+      const row: Record<string, number | string> = { date: new Date(m.date).toLocaleDateString("en-US", { month: "short", day: "numeric" }) };
+      companies.forEach((c) => {
+        const cm = c.metrics?.[i];
+        if (cm) row[c.company.name] = cm[activeMetric];
+      });
+      data.push(row);
+    });
+  }
+
+  const tooltipStyle = {
+    borderRadius: 8, border: "1px solid var(--border)", background: "var(--popover)",
+    color: "var(--popover-foreground)", fontSize: 12, boxShadow: "0 4px 16px rgba(0,0,0,0.08)",
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <CardTitle className="flex items-center gap-2">
+              <TrendingUp className="h-4 w-4 text-primary" />
+              Trend Overlay
+            </CardTitle>
+            <CardDescription>30-day {cfg.label.toLowerCase()} comparison across all selected companies</CardDescription>
+          </div>
+          <div className="flex gap-1">
+            {TREND_METRICS.map((m) => (
+              <button
+                key={m.key}
+                onClick={() => setActiveMetric(m.key)}
+                className={cn(
+                  "rounded-md px-2 py-1 text-xs font-medium transition-colors",
+                  activeMetric === m.key ? "bg-primary text-primary-foreground" : "bg-muted text-muted-foreground hover:bg-muted/70"
+                )}
+              >
+                {m.label}
+              </button>
+            ))}
+          </div>
+        </div>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={300}>
+          <LineChart data={data} margin={{ top: 8, right: 8, left: 0, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" vertical={false} />
+            <XAxis dataKey="date" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} minTickGap={24} />
+            <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} tickFormatter={(v) => cfg.format(v)} width={56} />
+            <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => cfg.format(v)} />
+            <Legend wrapperStyle={{ fontSize: 11 }} iconType="circle" iconSize={8} />
+            {companies.map((c, i) => (
+              <Line
+                key={c.company.id}
+                type="monotone"
+                dataKey={c.company.name}
+                stroke={TREND_COLORS[i % TREND_COLORS.length]}
+                strokeWidth={2.5}
+                dot={false}
+              />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
   );
 }

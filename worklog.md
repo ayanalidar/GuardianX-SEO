@@ -330,3 +330,46 @@ Stage Summary:
 - Real geo SVG for rank map.
 - Scheduled email digests for alerts + forecast summaries.
 - Multi-company trend overlay in compare view.
+
+---
+Task ID: 15 (webDevReview round 4 — saved views, trend overlay)
+Agent: main (Z.ai Code) — cron-triggered review
+Task: Assess project status, perform QA, fix bugs, advance with new features.
+
+## Current Project Status / Assessment
+- Project is stable: marketing site (4 pages), 18-tab dashboard, client portal, 13+ feature modules, all lint-clean.
+- QA via agent-browser: all 18 tabs render without errors, compare view works, mobile has no overflow.
+- No bugs found — focused on new features.
+
+## Current Goals / Completed Modifications / Verification Results
+
+Work Log:
+- Built **Saved Views / Bookmarks** (`store/saved-views.ts` + `saved-views.tsx`):
+  - Zustand store with `persist` middleware → bookmarks saved to localStorage (`rankforge-saved-views`).
+  - `SavedViewsButton` — bookmark icon in dashboard header with count badge; dropdown lists saved views with company name, time-ago, and remove buttons; "Clear all" trash button.
+  - `BookmarkThisView` — "Save view" button in the company detail header (next to PDF Report); toggles saved state with toast notifications.
+  - Dedupes by companyId+tab; max 30 saved views.
+- Built **Multi-company Trend Overlay** in compare view:
+  - Updated `/api/compare` to return 30-day `metrics` time-series (date, organicTraffic, visibilityScore, avgPosition, domainAuthority) per company.
+  - Added `TrendOverlay` component to compare-view: LineChart overlaying all selected companies' 30-day trends; 4 metric toggles (Organic Traffic, Visibility Score, Avg Position, Domain Authority) with formatted tooltips + legend.
+  - Placed above the Head-to-Head Metrics card.
+  - Fixed React 19 `preserve-manual-memoization` lint rule by computing chart data inline (no useMemo needed for small dataset).
+
+Verification:
+- Saved Views: "Save view" button in company header toggles to "Saved"; toast "ShopMax added to your views"; bookmark icon in header shows count badge; dropdown lists the saved view with "just now" timestamp.
+- Trend Overlay: renders in compare view with 2+ companies; metric toggle switches between Organic Traffic / Visibility / Position / Authority; chart updates correctly.
+- All 18 tabs render without errors.
+- Mobile: no horizontal overflow. Lint: clean (0 errors). No console/page errors.
+
+Stage Summary:
+- **2 new features**: Saved Views/Bookmarks (localStorage-persisted), Multi-company Trend Overlay (4-metric LineChart in compare view).
+- **1 API update**: `/api/compare` now returns metrics time-series.
+- **Lint**: clean. **Verification**: all tested via agent-browser.
+
+## Unresolved Issues / Risks + Next-phase Recommendations
+- Client portal could gain its own Forecast + Landscape radar tabs.
+- Real NextAuth authentication (currently mock sign-in).
+- d3-force for larger internal link graphs.
+- Real geo SVG for rank map.
+- Scheduled email digests for alerts + forecast summaries.
+- Animated KPI card transitions + progress ring fills (styling polish deferred).

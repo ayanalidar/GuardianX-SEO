@@ -6,6 +6,7 @@ import { useTheme } from "next-themes";
 import { useNav } from "@/store/nav";
 import { cn } from "@/lib/utils";
 import { NotificationsBell } from "./notifications-bell";
+import { SavedViewsButton } from "./saved-views";
 
 export function Header() {
   const { setTheme } = useTheme();
@@ -91,6 +92,7 @@ export function Header() {
           </>
         )}
 
+        <SavedViewsButton />
         <NotificationsBell />
 
         <Button

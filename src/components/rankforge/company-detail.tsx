@@ -29,6 +29,7 @@ import { ContentBriefGenerator } from "./features/content-brief-generator";
 import { CannibalizationDetector } from "./features/cannibalization-detector";
 import { CompetitiveRadar } from "./features/competitive-radar";
 import { SeoForecast } from "./features/seo-forecast";
+import { BookmarkThisView } from "./saved-views";
 import { DomainIcon } from "./icons";
 import { scoreGrade } from "@/lib/seo/score";
 import {
@@ -147,15 +148,23 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
 
             {/* right: score ring + report */}
             <div className="flex flex-col items-end gap-3 shrink-0 self-center">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => window.open(`/api/report?companyId=${company.id}`, "_blank")}
-                className="gap-1.5"
-              >
-                <FileDown className="h-3.5 w-3.5" />
-                PDF Report
-              </Button>
+              <div className="flex items-center gap-2">
+                <BookmarkThisView
+                  companyId={company.id}
+                  companySlug={company.slug}
+                  domainSlug={domain.slug}
+                  label={company.name}
+                />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => window.open(`/api/report?companyId=${company.id}`, "_blank")}
+                  className="gap-1.5"
+                >
+                  <FileDown className="h-3.5 w-3.5" />
+                  PDF Report
+                </Button>
+              </div>
               <div className="flex items-center gap-6">
                 <div className="text-right">
                   <div className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
