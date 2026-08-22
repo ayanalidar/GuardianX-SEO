@@ -11,6 +11,7 @@ import {
   Link2, KeyRound, AlertTriangle, ArrowRight, Check, GitCompare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { MiniSparkline } from "./mini-sparkline";
 
 export function CompanyCard({
   company,
@@ -148,6 +149,16 @@ export function CompanyCard({
                   {Math.abs(company.trafficDelta).toFixed(1)}%
                 </span>
               </div>
+              {company.sparkline && company.sparkline.length > 1 && (
+                <div className="mt-1.5">
+                  <MiniSparkline
+                    data={company.sparkline}
+                    color={trafficUp ? "#10b981" : "#f43f5e"}
+                    width={90}
+                    height={20}
+                  />
+                </div>
+              )}
             </div>
             <div>
               <div className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">

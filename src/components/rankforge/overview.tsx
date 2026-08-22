@@ -6,7 +6,7 @@ import { DomainIcon } from "./icons";
 import { formatNumber } from "@/lib/seo/hooks";
 import {
   Building2, TrendingUp, KeyRound, Link2, Sparkles, Activity,
-  Rocket, ArrowRight, Zap,
+  Rocket, ArrowRight, Zap, FileDown,
 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
@@ -152,6 +152,13 @@ export function Overview({
                 <Rocket className="h-4 w-4" />
                 Onboard a Client
                 <ArrowRight className="h-4 w-4 group-hover:translate-x-0.5 transition-transform" />
+              </button>
+              <button
+                onClick={() => window.open("/api/export/companies", "_blank")}
+                className="inline-flex items-center gap-2 rounded-xl border bg-background px-4 py-2.5 text-sm font-semibold hover:bg-muted transition-colors"
+              >
+                <FileDown className="h-4 w-4 text-primary" />
+                Export All
               </button>
               <div className="inline-flex items-center gap-2 text-sm text-muted-foreground">
                 <Zap className="h-4 w-4 text-amber-500" />

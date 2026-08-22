@@ -572,3 +572,47 @@ Stage Summary:
 - Real geo SVG for rank map.
 - Scheduled email digests for alerts + forecast summaries.
 - Animated chart entrances + improved dark mode (styling polish deferred).
+
+---
+Task ID: 20 (webDevReview round 9 — sparklines in cards, platform CSV export)
+Agent: main (Z.ai Code) — cron-triggered review
+Task: Assess project status, perform QA, fix bugs, advance with new features.
+
+## Current Project Status / Assessment
+- Project is stable: marketing site (4 pages), 18-tab dashboard, client portal (with radar + forecast), 20+ feature modules, all lint-clean.
+- QA via agent-browser: all 18 tabs render without errors, keyboard shortcuts work, sort works, mobile has no overflow.
+- No bugs found — focused on sparklines in company cards + platform-wide CSV export.
+
+## Current Goals / Completed Modifications / Verification Results
+
+Work Log:
+- Built **SEO Health Score sparkline in company cards**:
+  - Updated `/api/domains` to return a `sparkline` array (last 14 days of visibility scores, 0-100) per company.
+  - Added `sparkline?: number[]` to the `CompanySummary` type.
+  - Created `MiniSparkline` component (`mini-sparkline.tsx`) — smooth SVG sparkline with gradient area fill, end dot, color-coded by trend (green for up, rose for down).
+  - Added the sparkline to each company card, below the Organic Traffic value — gives an instant visual of the 14-day visibility trend.
+  - Verified: 52 company cards each render a sparkline SVG.
+- Built **platform-wide CSV export** (`/api/export/companies`):
+  - Exports ALL companies as a CSV with 16 columns: Name, Website, Industry, Domain, Location, Employees, Founded, Traffic, Keywords, Avg Position, Domain Authority, Visibility, Backlinks, Tracked Keywords, Tracked Backlinks, Open Issues.
+  - Added "Export All" button to the dashboard overview hero (next to "Onboard a Client").
+  - Verified: returns 200 text/csv, 6KB, proper CSV with headers + data.
+
+Verification:
+- Sparklines: 52 cards each render sparkline SVGs (1095 total SVG paths on page).
+- Export All button: visible in hero, opens CSV download (200 text/csv, 6KB).
+- All 18 tabs render without errors.
+- Mobile: no horizontal overflow. Lint: clean (0 errors). No console/page errors.
+
+Stage Summary:
+- **2 new features**: Mini sparklines in company cards (14-day visibility trend), Platform-wide CSV export (16 columns).
+- **1 new API route**: `/api/export/companies`.
+- **1 API update**: `/api/domains` now returns sparkline data.
+- **Lint**: clean. **Verification**: all tested via agent-browser.
+
+## Unresolved Issues / Risks + Next-phase Recommendations
+- Animated chart entrances + improved dark mode contrast (styling polish deferred).
+- Real NextAuth authentication (currently mock sign-in).
+- d3-force for larger internal link graphs.
+- Real geo SVG for rank map.
+- Scheduled email digests for alerts + forecast summaries.
+- Glassmorphic stat cards + gradient progress bars (styling polish deferred).

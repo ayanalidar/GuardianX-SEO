@@ -26,6 +26,7 @@ export type CompanySummary = {
   blCount: number;
   issueCount: number;
   trafficDelta: number;
+  sparkline?: number[];
 };
 
 export type DomainWithCompanies = Domain & {
