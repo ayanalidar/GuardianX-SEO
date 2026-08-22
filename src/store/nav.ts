@@ -2,7 +2,10 @@
 
 import { create } from "zustand";
 
+export type MarketingPage = "home" | "industries" | "capabilities" | "auth";
+
 export type View =
+  | { kind: "marketing"; page: MarketingPage }
   | { kind: "overview"; domainSlug?: string }
   | { kind: "company"; companyId: string; companySlug: string; domainSlug: string }
   | { kind: "compare"; companyIds: string[] };
@@ -26,10 +29,12 @@ interface NavState {
   clearCompare: () => void;
   openCompare: (ids: string[]) => void;
   setOnboarding: (open: boolean) => void;
+  setMarketingPage: (page: MarketingPage) => void;
+  enterApp: () => void;
 }
 
 export const useNav = create<NavState>((set) => ({
-  view: { kind: "overview", domainSlug: undefined },
+  view: { kind: "marketing", page: "home" },
   searchOpen: false,
   compareMode: false,
   compareIds: [],
@@ -64,4 +69,6 @@ export const useNav = create<NavState>((set) => ({
   openCompare: (ids) =>
     set({ view: { kind: "compare", companyIds: ids }, compareMode: false }),
   setOnboarding: (open) => set({ onboarding: open }),
+  setMarketingPage: (page) => set({ view: { kind: "marketing", page } }),
+  enterApp: () => set({ view: { kind: "overview", domainSlug: undefined } }),
 }));

@@ -19,13 +19,22 @@ import {
   TechnicalIssuesPanel, ContentGapsPanel, AiInsightsPanel,
   CoreWebVitalsPanel, SerpFeaturesPanel,
 } from "./panels";
+import { SeoHealthTimeline } from "./features/seo-health-timeline";
+import { KeywordHeatmap } from "./features/keyword-heatmap";
+import { InternalLinkGraph } from "./features/internal-link-graph";
+import { AnchorCloud } from "./features/anchor-cloud";
+import { RankTrackingMap } from "./features/rank-tracking-map";
+import { CompetitorAlerts } from "./features/competitor-alerts";
+import { ContentBriefGenerator } from "./features/content-brief-generator";
+import { CannibalizationDetector } from "./features/cannibalization-detector";
 import { DomainIcon } from "./icons";
 import { scoreGrade } from "@/lib/seo/score";
 import {
   ArrowLeft, Globe, MapPin, Users, Calendar, Building2,
   Activity, KeyRound, Link2, Gauge, Eye, TrendingUp,
   Search, Target, Shield, Lightbulb, Bot, ChevronRight,
-  Zap, Layers,
+  Zap, Layers, Grid3x3, Network, Bell, Map as MapIcon, GitBranch,
+  FileDown,
 } from "lucide-react";
 
 export function CompanyDetail({ companyId }: { companyId: string }) {
@@ -134,17 +143,28 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
               </div>
             </div>
 
-            {/* right: score ring */}
-            <div className="flex items-center gap-6 shrink-0 self-center">
-              <div className="text-right">
-                <div className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
-                  SEO Health Score
+            {/* right: score ring + report */}
+            <div className="flex flex-col items-end gap-3 shrink-0 self-center">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => window.open(`/api/report?companyId=${company.id}`, "_blank")}
+                className="gap-1.5"
+              >
+                <FileDown className="h-3.5 w-3.5" />
+                PDF Report
+              </Button>
+              <div className="flex items-center gap-6">
+                <div className="text-right">
+                  <div className="text-xs uppercase tracking-wide text-muted-foreground font-medium">
+                    SEO Health Score
+                  </div>
+                  <div className="text-sm text-muted-foreground mt-1">
+                    Composite ranking
+                  </div>
                 </div>
-                <div className="text-sm text-muted-foreground mt-1">
-                  Composite ranking
-                </div>
+                <ScoreRing score={seoScore.total} size={130} />
               </div>
-              <ScoreRing score={seoScore.total} size={130} />
             </div>
           </div>
 
@@ -254,6 +274,30 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
           <TabsTrigger value="ai" className="gap-1.5">
             <Bot className="h-3.5 w-3.5" /> AI Insights
           </TabsTrigger>
+          <TabsTrigger value="timeline" className="gap-1.5">
+            <Activity className="h-3.5 w-3.5" /> Timeline
+          </TabsTrigger>
+          <TabsTrigger value="heatmap" className="gap-1.5">
+            <Grid3x3 className="h-3.5 w-3.5" /> Heatmap
+          </TabsTrigger>
+          <TabsTrigger value="linkgraph" className="gap-1.5">
+            <Network className="h-3.5 w-3.5" /> Link Graph
+          </TabsTrigger>
+          <TabsTrigger value="anchorcloud" className="gap-1.5">
+            <Link2 className="h-3.5 w-3.5" /> Anchor Cloud
+          </TabsTrigger>
+          <TabsTrigger value="rankmap" className="gap-1.5">
+            <MapIcon className="h-3.5 w-3.5" /> Rank Map
+          </TabsTrigger>
+          <TabsTrigger value="alerts" className="gap-1.5">
+            <Bell className="h-3.5 w-3.5" /> Alerts
+          </TabsTrigger>
+          <TabsTrigger value="briefs" className="gap-1.5">
+            <Bot className="h-3.5 w-3.5" /> Content Briefs
+          </TabsTrigger>
+          <TabsTrigger value="cannibalization" className="gap-1.5">
+            <GitBranch className="h-3.5 w-3.5" /> Cannibalization
+          </TabsTrigger>
         </TabsList>
 
         {/* Overview tab */}
@@ -311,6 +355,7 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
               </CardContent>
             </Card>
           </div>
+          <SeoHealthTimeline metrics={metrics} />
         </TabsContent>
 
         <TabsContent value="keywords">
@@ -343,6 +388,38 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
 
         <TabsContent value="ai">
           <AiInsightsPanel companyId={company.id} />
+        </TabsContent>
+
+        <TabsContent value="timeline" className="space-y-4">
+          <SeoHealthTimeline metrics={data.metrics} />
+        </TabsContent>
+
+        <TabsContent value="heatmap">
+          <KeywordHeatmap keywords={data.keywords} />
+        </TabsContent>
+
+        <TabsContent value="linkgraph">
+          <InternalLinkGraph links={data.internalLinks} />
+        </TabsContent>
+
+        <TabsContent value="anchorcloud">
+          <AnchorCloud backlinks={data.backlinks} />
+        </TabsContent>
+
+        <TabsContent value="rankmap">
+          <RankTrackingMap rankGeo={data.rankGeo} />
+        </TabsContent>
+
+        <TabsContent value="alerts">
+          <CompetitorAlerts alerts={data.alerts} companyId={company.id} />
+        </TabsContent>
+
+        <TabsContent value="briefs">
+          <ContentBriefGenerator companyId={company.id} />
+        </TabsContent>
+
+        <TabsContent value="cannibalization">
+          <CannibalizationDetector keywords={data.keywords} />
         </TabsContent>
       </Tabs>
     </div>

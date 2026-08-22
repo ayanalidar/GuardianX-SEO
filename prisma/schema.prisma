@@ -48,6 +48,10 @@ model Company {
   insights    SeoInsight[]
   webVitals   CoreWebVital[]
   serpFeatures SerpFeature[]
+  alerts      CompetitorAlert[]
+  contentBriefs ContentBrief[]
+  internalLinks InternalLink[]
+  rankGeo     RankGeo[]
   client      Client?
 
   @@unique([domainId, slug])
@@ -268,6 +272,77 @@ model SerpFeature {
   captured  Boolean  @default(true)
   competitorOwned Boolean @default(false) // true if a competitor owns this feature
   updatedAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+// Competitor alerts — real-time notifications about competitor activity
+model CompetitorAlert {
+  id          String   @id @default(cuid())
+  companyId   String
+  type        String   // rank-gain | rank-loss | new-content | backlink-surge | feature-captured | feature-lost
+  severity    String   @default("info") // info | warning | critical
+  title       String
+  description String
+  competitor  String
+  metric      String?
+  value       String?
+  read        Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+// AI-generated content briefs (from LLM)
+model ContentBrief {
+  id          String   @id @default(cuid())
+  companyId   String
+  keyword     String
+  title       String
+  metaDescription String
+  wordCount   Int
+  outline     String   // JSON array of sections
+  relatedEntities String // JSON array
+  internalLinks String   // JSON array of suggested URLs
+  createdAt   DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+// Internal link structure — nodes & edges for the link graph
+model InternalLink {
+  id          String   @id @default(cuid())
+  companyId   String
+  sourceUrl   String
+  targetUrl   String
+  anchorText  String
+  sourceTitle String
+  targetTitle String
+  sourceDepth Int      // 0 = homepage
+  linkType    String   // dofollow | nofollow
+  authority   Float    // 0..100 page authority estimate
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+// Geographic rank tracking — SERP position by country/region
+model RankGeo {
+  id          String   @id @default(cuid())
+  companyId   String
+  country     String
+  countryCode String
+  keyword     String
+  position    Int
+  searchVolume Int
+  updatedAt   DateTime @default(now())
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 

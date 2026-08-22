@@ -1,9 +1,9 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect, useState } from "react";
 import { useFetch, formatNumber, formatPercent, formatFull } from "@/lib/seo/hooks";
 import type { CompanyDetail } from "@/lib/seo/types";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import {
   AnimatedCounter, AnimatedScoreRing, CinematicBackground,
   Reveal, StaggerContainer, StaggerItem,
@@ -17,11 +17,10 @@ import {
   Rocket, Globe, Activity, KeyRound, Link2, Gauge, Eye,
   TrendingUp, TrendingDown, Target, CheckCircle2, Circle,
   Clock, Calendar, Copy, ExternalLink, Sparkles, Zap,
-  AlertTriangle, Trophy, ArrowRight, Bot, ListChecks,
+  AlertTriangle, Trophy, ArrowRight, Bot, ListChecks, X,
 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { cn } from "@/lib/utils";
-import { useState } from "react";
 
 type ClientData = CompanyDetail & {
   client: {
@@ -62,6 +61,18 @@ export function ClientPortal({ token }: { token: string }) {
   const { data, loading, error } = useFetch<ClientData>(`/api/client/${token}`);
   const { toast } = useToast();
   const [taskFilter, setTaskFilter] = useState<"all" | "todo" | "in-progress" | "done">("all");
+  const [celebrated, setCelebrated] = useState<string[]>([]);
+
+  // Goal achievement notifications — celebrate goals at 100% (computed after data loads)
+  const achievedGoals = (data?.goals ?? []).filter((g) => g.progress >= 100);
+  const newlyAchieved = achievedGoals.filter((g) => !celebrated.includes(g.id));
+  useEffect(() => {
+    if (newlyAchieved.length === 0) return;
+    const t = setTimeout(() => {
+      setCelebrated((c) => [...c, ...newlyAchieved.map((g) => g.id)]);
+    }, 6000);
+    return () => clearTimeout(t);
+  }, [newlyAchieved.length]);
 
   const copyLink = () => {
     const url = `${window.location.origin}/portal/${token}`;
@@ -110,6 +121,43 @@ export function ClientPortal({ token }: { token: string }) {
 
   return (
     <div className="min-h-screen flex flex-col">
+      {/* Goal achievement celebration banner */}
+      <AnimatePresence>
+        {newlyAchieved.length > 0 && (
+          <motion.div
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            className="fixed top-16 left-1/2 -translate-x-1/2 z-50 w-[min(520px,calc(100vw-2rem))]"
+          >
+            <div className="relative overflow-hidden rounded-2xl border-2 border-emerald-500/40 bg-gradient-to-r from-emerald-500/15 to-teal-500/15 backdrop-blur-xl shadow-2xl p-4">
+              <div className="flex items-center gap-3">
+                <motion.span
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ type: "spring", duration: 0.6 }}
+                  className="flex h-11 w-11 items-center justify-center rounded-full bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg"
+                >
+                  <Trophy className="h-6 w-6" />
+                </motion.span>
+                <div className="flex-1">
+                  <div className="font-bold text-sm">Goal Achieved! 🎉</div>
+                  <div className="text-xs text-muted-foreground">
+                    {newlyAchieved[0].label} hit 100%
+                    {newlyAchieved.length > 1 && ` +${newlyAchieved.length - 1} more`}
+                  </div>
+                </div>
+                <button
+                  onClick={() => setCelebrated((c) => [...c, ...newlyAchieved.map((g) => g.id)])}
+                  className="text-muted-foreground hover:text-foreground"
+                >
+                  <X className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
       {/* Portal header (different from main app) */}
       <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-xl">
         <div className="mx-auto flex h-16 max-w-[1200px] items-center gap-3 px-4 md:px-6">

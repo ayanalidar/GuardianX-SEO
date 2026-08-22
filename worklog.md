@@ -162,3 +162,56 @@ Unresolved / Next-phase recommendations:
 - Add a client-side "request audit" / "contact SEO team" feature.
 - Add PDF report export branded per client.
 - Consider a cinematic "loading reveal" sequence when a portal first loads (staggered number reveals).
+
+---
+Task ID: 12 (marketing site + all 10 advanced features)
+Agent: main (Z.ai Code)
+Task: Build marketing homepage, industries, capabilities, login/signup pages, then add all 10 suggested advanced features.
+
+Work Log:
+- Added `marketing` view to nav store (pages: home/industries/capabilities/auth) with `setMarketingPage` + `enterApp` actions; default view is now marketing home.
+- Updated app-shell to render `MarketingSite` when view.kind === "marketing" (own header/footer, no domain tabs) and sync `?p=` / `?app=1` URL params.
+- Built 4 marketing pages in `src/components/rankforge/marketing/`:
+  - `marketing-home.tsx` — cinematic hero with mesh background, animated counters, 8-capability preview grid, industries preview, CTA section.
+  - `marketing-industries.tsx` — grid of all 10 domains with per-domain stats (companies, traffic, keywords, avg DA, visibility).
+  - `marketing-capabilities.tsx` — 6 capability groups × 4 modules each = 24 capabilities with colored icons.
+  - `marketing-auth.tsx` — polished login/signup form with mode toggle, animated value-props sidebar, loading spinner.
+  - `marketing-site.tsx` — shell with sticky header (Home/Industries/Capabilities/Login nav + Launch Dashboard CTA), mobile menu, AnimatePresence page transitions, footer.
+- Extended Prisma schema with 4 new models: `CompetitorAlert`, `ContentBrief`, `InternalLink`, `RankGeo` (+ relations on Company).
+- Pushed schema + generated Prisma client.
+- Wrote `prisma/seed-features.ts` generating: 339 competitor alerts, 624 internal links (15-page site graph with orphans), 2500 geo rank records (10 countries × top-5 keywords per company).
+- Updated `db.ts` `hasAllModels()` to validate all 8 new models.
+- Built 10 feature components in `src/components/rankforge/features/`:
+  1. `seo-health-timeline.tsx` — interactive scrubable timeline; 6 metric toggles, hover-scrub updates live value, event annotations (surges/dips/gains) with color-coded badges.
+  2. `competitor-alerts.tsx` — alert feed with filter (all/unread/critical), mark-read/mark-all-read (PATCH API), severity badges, unread bell counter.
+  3. `keyword-heatmap.tsx` — 2D bubble chart (X=difficulty, Y=log-volume, size/color=opportunity), quadrant labels, hover tooltips, legend.
+  4. `internal-link-graph.tsx` — custom SVG force-directed simulation (repulsion + link attraction + centering), depth-colored nodes, orphan detection (dashed amber), hover highlights connections.
+  5. `content-brief-generator.tsx` — LLM-powered; enter keyword → generates title, meta, word count, 6-8 section outline, 8-12 related entities, 4-6 internal-link suggestions; copy-to-clipboard.
+  6. `rank-tracking-map.tsx` — stylized world map with country pins (size=keyword count, color=avg position), hover tooltips with flag + stats, country leaderboard with winner crown.
+  7. `anchor-cloud.tsx` — word-cloud of anchor texts (size=frequency, color=dofollow ratio), hover highlights + count badge, opacity dimming.
+  8. (PDF reports) `api/report/route.ts` — generates branded HTML SEO report (print-to-PDF) with score ring, KPIs, top keywords, score breakdown, issue summary; "PDF Report" button in company header.
+  9. (Goal notifications) — client portal celebration banner: slides down when a goal hits 100%, spring-in trophy, auto-dismiss after 6s.
+  10. `cannibalization-detector.tsx` — finds keywords where multiple URLs compete, shows winner + competitors per keyword with consolidation advice.
+- Built 3 new API routes: `PATCH /api/companies/[id]/alerts` (mark read), `POST /api/companies/[id]/briefs` (LLM brief), `GET /api/report?companyId=` (HTML report).
+- Updated company detail API to return alerts, internalLinks, rankGeo.
+- Updated types.ts with CompetitorAlert, InternalLink, RankGeo types + added to CompanyDetail.
+- Wired all 10 features as new tabs in company-detail.tsx (dashboard now has 16 tabs) + SEO Health Timeline also embedded in the Overview tab.
+- Added "PDF Report" button to the company detail header.
+- Fixed React hooks order violation in client-portal.tsx (moved celebration useState/useEffect before early returns).
+- Verified with agent-browser: marketing home/industries/capabilities/auth all render; dashboard 16 tabs all present; Timeline/Heatmap/LinkGraph/Alerts render without errors; AI Content Brief Generator produces real LLM brief for "best wireless headphones" (POST 200 in 15.3s); PDF report returns 200 text/html (7.9KB). Lint clean. No console errors.
+
+Stage Summary:
+- **Marketing site**: 4 pages (home/industries/capabilities/auth) with cinematic animations, own header/footer, URL-synced via `?p=` / `?app=1`.
+- **10 new features**: SEO Health Timeline, Competitor Alerts, Keyword Heatmap, Internal Link Graph, AI Content Brief Generator, Rank Tracking Map, Anchor-Text Cloud, PDF Reports, Goal Achievement Notifications, Cannibalization Detector.
+- **New data**: +339 alerts, +624 internal links, +2500 geo rank records.
+- **New API routes**: `/api/companies/[id]/alerts` (PATCH), `/api/companies/[id]/briefs` (POST LLM), `/api/report` (GET HTML).
+- **Dashboard tabs**: 9 → 16 (added Timeline, Heatmap, Link Graph, Anchor Cloud, Rank Map, Alerts, Content Briefs, Cannibalization).
+- **Lint**: clean. **Verification**: all flows tested via agent-browser.
+
+Unresolved / Next-phase recommendations:
+- Client portal could gain its own feature tabs (timeline, heatmap) tailored for clients.
+- Add real NextAuth credential authentication (currently mock).
+- Internal link graph could use a proper physics library (d3-force) for larger sites.
+- Rank map could use a real geo SVG instead of stylized pins.
+- Add scheduled email digests for competitor alerts.
+- Add multi-company trend overlay in compare view.

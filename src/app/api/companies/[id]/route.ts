@@ -27,6 +27,9 @@ export async function GET(
     insights,
     webVitals,
     serpFeatures,
+    alerts,
+    internalLinks,
+    rankGeo,
     latest,
     first,
   ] = await Promise.all([
@@ -65,6 +68,17 @@ export async function GET(
     db.serpFeature.findMany({
       where: { companyId: id },
       orderBy: [{ captured: "desc" }, { updatedAt: "desc" }],
+    }),
+    db.competitorAlert.findMany({
+      where: { companyId: id },
+      orderBy: { createdAt: "desc" },
+    }),
+    db.internalLink.findMany({
+      where: { companyId: id },
+    }),
+    db.rankGeo.findMany({
+      where: { companyId: id },
+      orderBy: { position: "asc" },
     }),
     db.seoMetric.findFirst({
       where: { companyId: id },
@@ -163,6 +177,9 @@ export async function GET(
     insights,
     webVitals,
     serpFeatures,
+    alerts,
+    internalLinks,
+    rankGeo,
     latest,
     seoScore,
     trafficDelta: Math.round(trafficDelta * 10) / 10,

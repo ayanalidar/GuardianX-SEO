@@ -149,6 +149,44 @@ export type SerpFeature = {
   updatedAt: string;
 };
 
+export type CompetitorAlert = {
+  id: string;
+  companyId: string;
+  type: string;
+  severity: string;
+  title: string;
+  description: string;
+  competitor: string;
+  metric: string | null;
+  value: string | null;
+  read: boolean;
+  createdAt: string;
+};
+
+export type InternalLink = {
+  id: string;
+  companyId: string;
+  sourceUrl: string;
+  targetUrl: string;
+  anchorText: string;
+  sourceTitle: string;
+  targetTitle: string;
+  sourceDepth: number;
+  linkType: string;
+  authority: number;
+};
+
+export type RankGeo = {
+  id: string;
+  companyId: string;
+  country: string;
+  countryCode: string;
+  keyword: string;
+  position: number;
+  searchVolume: number;
+  updatedAt: string;
+};
+
 export type CompanyDetail = {
   company: CompanySummary & { domainId: string; createdAt: string };
   domain: Domain;
@@ -161,6 +199,9 @@ export type CompanyDetail = {
   insights: SeoInsight[];
   webVitals: CoreWebVital[];
   serpFeatures: SerpFeature[];
+  alerts: CompetitorAlert[];
+  internalLinks: InternalLink[];
+  rankGeo: RankGeo[];
   latest: SeoMetric | null;
   seoScore: {
     total: number;
