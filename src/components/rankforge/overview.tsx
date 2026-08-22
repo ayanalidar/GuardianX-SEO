@@ -11,6 +11,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { motion } from "framer-motion";
 import { AnimatedCounter, CinematicBackground, Reveal, StaggerContainer, StaggerItem } from "./motion";
+import { ActivityFeed } from "./features/activity-feed";
 import { useNav } from "@/store/nav";
 
 export function Overview({
@@ -162,6 +163,13 @@ export function Overview({
         </section>
       ) : (
         filtered.length > 0 && <DomainHeader domain={filtered[0]} />
+      )}
+
+      {/* Activity feed (only on all-domains view) */}
+      {(!activeSlug || activeSlug === "all") && (
+        <Reveal>
+          <ActivityFeed />
+        </Reveal>
       )}
 
       {/* Domain sections */}

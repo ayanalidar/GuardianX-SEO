@@ -478,3 +478,54 @@ Stage Summary:
 - Real geo SVG for rank map.
 - Scheduled email digests for alerts + forecast summaries.
 - SEO Health Score gauge with animated history sparkline in overview cards (deferred).
+
+---
+Task ID: 18 (webDevReview round 7 — keyboard shortcuts, activity feed, styling polish)
+Agent: main (Z.ai Code) — cron-triggered review
+Task: Assess project status, perform QA, fix bugs, advance with new features + styling polish.
+
+## Current Project Status / Assessment
+- Project is stable: marketing site (4 pages), 18-tab dashboard, client portal (with radar + forecast), 17+ feature modules, all lint-clean.
+- QA via agent-browser: all 18 tabs render without errors, search/shortcuts work, mobile has no overflow.
+- No bugs found — focused on wiring keyboard shortcuts + activity feed + styling polish.
+
+## Current Goals / Completed Modifications / Verification Results
+
+Work Log:
+- Wired **actual keyboard shortcut handlers** (`use-global-shortcuts.ts`):
+  - `G then D` → enter dashboard; `G then H` → marketing home; `G then I` → industries; `G then C` → capabilities.
+  - `N` → open onboarding wizard; `C` → toggle compare mode (in overview); `B` → bookmark current view (in company view); `T` → toggle theme.
+  - G-prefix uses an 800ms timeout window; ignores keypresses when typing in inputs or when a dialog is open.
+  - Hook called in `AppShell` so it's active globally.
+- Built **Activity Feed** (`/api/activity` + `features/activity-feed.tsx`):
+  - API aggregates recent activity across ALL companies: competitor alerts, AI insights, new backlinks, resolved issues, and new onboardings — returns up to 20 sorted by timestamp desc.
+  - Component: animated list with type-specific icons (alert/insight/backlink/resolved/onboarded), company logo, time-ago timestamps, hover-to-highlight; loading skeletons.
+  - Added to the dashboard overview (only on all-domains view), below the hero, wrapped in Reveal.
+  - Verified: API returns 20 activities; feed renders with "Pixel Forge Studio onboarded", "NextGen Co. gained 27 new backlinks", etc.
+- Added **styling polish** to `globals.css`:
+  - `rf-depth` — layered card shadows (light + dark variants).
+  - `rf-skeleton-wave` — improved skeleton with diagonal wave shimmer.
+  - `rf-press` — button press micro-interaction (scale 0.97 on active).
+  - `rf-count-up` — tabular-nums for count-up emphasis.
+  - `rf-ring-loader` — spinning ring loader.
+  - `rf-focus-glow` — soft shadow glow on focus for interactive cards.
+
+Verification:
+- Keyboard shortcuts: `N` opens onboarding wizard ✓; `T` toggles theme (light→dark→light) ✓.
+- Activity feed: renders on dashboard overview with 20 recent activities ✓.
+- All 18 tabs render without errors.
+- Mobile: no horizontal overflow. Lint: clean (0 errors). No console/page errors.
+
+Stage Summary:
+- **2 new features**: Wired keyboard shortcut handlers (G+D/H/I/C, N/C/B/T), Activity Feed (recent changes timeline).
+- **1 new API route**: `/api/activity`.
+- **Styling**: card depth shadows, wave skeletons, press micro-interactions, ring loader, focus glow.
+- **Lint**: clean. **Verification**: all tested via agent-browser.
+
+## Unresolved Issues / Risks + Next-phase Recommendations
+- SEO Health Score gauge with animated history sparkline in overview cards (deferred again).
+- Real NextAuth authentication (currently mock sign-in).
+- d3-force for larger internal link graphs.
+- Real geo SVG for rank map.
+- Scheduled email digests for alerts + forecast summaries.
+- Tab switching via number keys (1-9) in company view (documented but not yet wired).

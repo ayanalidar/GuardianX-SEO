@@ -12,6 +12,7 @@ import { OnboardingWizard } from "./onboarding-wizard";
 import { CommandPalette } from "./command-palette";
 import { ShortcutsOverlay } from "./shortcuts-overlay";
 import { MarketingSite } from "./marketing/marketing-site";
+import { useGlobalShortcuts } from "@/lib/seo/use-global-shortcuts";
 import { useNav } from "@/store/nav";
 import { useFetch } from "@/lib/seo/hooks";
 import { DomainWithCompanies } from "@/lib/seo/types";
@@ -19,6 +20,7 @@ import { DomainWithCompanies } from "@/lib/seo/types";
 export function AppShell() {
   const view = useNav((s) => s.view);
   const setDomain = useNav((s) => s.setDomain);
+  useGlobalShortcuts();
 
   const { data, loading } = useFetch<{ domains: DomainWithCompanies[] }>(
     "/api/domains"
