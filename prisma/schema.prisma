@@ -1,0 +1,177 @@
+// RankForge SEO — Advanced Multi-Domain SEO Optimization Platform
+// Prisma schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// A business domain / industry category (top-level tab)
+model Domain {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  slug        String   @unique
+  description String
+  icon        String
+  color       String
+  accent      String
+  createdAt   DateTime @default(now())
+  companies   Company[]
+}
+
+// A company / website tracked within a domain — gets its own dedicated page
+model Company {
+  id          String   @id @default(cuid())
+  domainId    String
+  name        String
+  slug        String
+  website     String
+  logoText    String
+  description String
+  location    String
+  employees   String
+  foundedYear Int
+  industry    String
+  createdAt   DateTime @default(now())
+
+  domain      Domain     @relation(fields: [domainId], references: [id], onDelete: Cascade)
+  metrics     SeoMetric[]
+  keywords    Keyword[]
+  backlinks   Backlink[]
+  competitors Competitor[]
+  issues      TechnicalIssue[]
+  contentGaps ContentGap[]
+  insights    SeoInsight[]
+
+  @@unique([domainId, slug])
+}
+
+// Time-series SEO metric snapshot (one per day per company)
+model SeoMetric {
+  id              String   @id @default(cuid())
+  companyId       String
+  date            DateTime
+  organicTraffic  Int
+  keywordsRanked  Int
+  backlinks       Int
+  referringDomains Int
+  domainAuthority Float
+  pageAuthority   Float
+  avgPosition     Float
+  visibilityScore Float
+  organicClicks   Int
+  impressions     Int
+  ctr             Float
+  bounceRate      Float
+  avgLoadTime     Float
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId, date])
+}
+
+// Tracked keyword with rank position + 30-day trend
+model Keyword {
+  id             String   @id @default(cuid())
+  companyId      String
+  keyword        String
+  position       Int
+  previousPosition Int
+  searchVolume   Int
+  difficulty     Float
+  cpc            Float
+  intent         String
+  url            String
+  trend          String   // JSON array of {date, position}
+  updatedAt      DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+// Backlink profile entry
+model Backlink {
+  id            String   @id @default(cuid())
+  companyId     String
+  sourceDomain  String
+  sourceUrl     String
+  anchorText    String
+  domainAuthority Float
+  linkType      String   // dofollow | nofollow
+  status        String   // active | lost | new
+  firstSeen     DateTime
+  traffic       Int
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+// Competitor analysis entry
+model Competitor {
+  id              String   @id @default(cuid())
+  companyId       String
+  name            String
+  domain          String
+  domainAuthority Float
+  organicTraffic Int
+  commonKeywords  Int
+  trafficOverlap  Float    // 0..1
+  backlinks       Int
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+// Technical SEO audit issue
+model TechnicalIssue {
+  id           String   @id @default(cuid())
+  companyId    String
+  type         String   // e.g. core-web-vitals, crawlability, mobile, schema, security
+  severity     String   // critical | warning | info
+  title        String
+  description  String
+  affectedCount Int
+  status       String   // open | resolved
+  detectedAt   DateTime
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+// Content gap opportunity — keyword competitors rank for that the company doesn't
+model ContentGap {
+  id              String   @id @default(cuid())
+  companyId       String
+  keyword         String
+  competitorRanking String // comma separated competitor names
+  searchVolume    Int
+  difficulty      Float
+  opportunity     Float    // 0..100 opportunity score
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+// AI-generated SEO insight / recommendation
+model SeoInsight {
+  id        String   @id @default(cuid())
+  companyId String
+  type      String   // opportunity | warning | action | competitive
+  title     String
+  content   String
+  priority  String   // high | medium | low
+  createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
