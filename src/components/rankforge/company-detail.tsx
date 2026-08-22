@@ -27,6 +27,7 @@ import { RankTrackingMap } from "./features/rank-tracking-map";
 import { CompetitorAlerts } from "./features/competitor-alerts";
 import { ContentBriefGenerator } from "./features/content-brief-generator";
 import { CannibalizationDetector } from "./features/cannibalization-detector";
+import { CompetitiveRadar } from "./features/competitive-radar";
 import { DomainIcon } from "./icons";
 import { scoreGrade } from "@/lib/seo/score";
 import {
@@ -259,6 +260,9 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
           <TabsTrigger value="competitors" className="gap-1.5">
             <Target className="h-3.5 w-3.5" /> Competitors
           </TabsTrigger>
+          <TabsTrigger value="landscape" className="gap-1.5">
+            <Target className="h-3.5 w-3.5" /> Landscape
+          </TabsTrigger>
           <TabsTrigger value="technical" className="gap-1.5">
             <Shield className="h-3.5 w-3.5" /> Technical
           </TabsTrigger>
@@ -370,8 +374,12 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
           <CompetitorsPanel competitors={data.competitors} companyName={company.name} />
         </TabsContent>
 
+        <TabsContent value="landscape">
+          <CompetitiveRadar companyName={company.name} latest={latest} competitors={data.competitors} />
+        </TabsContent>
+
         <TabsContent value="technical">
-          <TechnicalIssuesPanel issues={data.issues} stats={data.issueStats} />
+          <TechnicalIssuesPanel issues={data.issues} stats={data.issueStats} companyId={company.id} />
         </TabsContent>
 
         <TabsContent value="cwv">

@@ -5,6 +5,7 @@ import { Search, Sun, Moon, Rocket, Command, GitCompare, UserPlus } from "lucide
 import { useTheme } from "next-themes";
 import { useNav } from "@/store/nav";
 import { cn } from "@/lib/utils";
+import { NotificationsBell } from "./notifications-bell";
 
 export function Header() {
   const { setTheme } = useTheme();
@@ -89,6 +90,8 @@ export function Header() {
             </Button>
           </>
         )}
+
+        <NotificationsBell />
 
         <Button
           variant="ghost"

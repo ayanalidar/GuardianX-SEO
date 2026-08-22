@@ -50,7 +50,7 @@ export function CompanyCard({
         }
       }}
       className={cn(
-        "group relative p-0 overflow-hidden cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        "group relative p-0 overflow-hidden cursor-pointer hover:shadow-xl hover:-translate-y-1 transition-all duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring rf-gradient-border",
         compareMode && isSelected && "ring-2 ring-emerald-500/60 shadow-lg"
       )}
     >

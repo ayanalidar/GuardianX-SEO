@@ -11,6 +11,7 @@ import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { KeywordTrendSparkline, BacklinkTypeChart, CwvGauge } from "./charts";
+import { IssueFixButton } from "./features/issue-fix-button";
 import {
   CompanyDetail, Keyword, Backlink, Competitor,
   TechnicalIssue, ContentGap, SeoInsight, CoreWebVital, SerpFeature,
@@ -373,7 +374,7 @@ const typeIcons: Record<string, string> = {
   indexability: "🔍",
 };
 
-export function TechnicalIssuesPanel({ issues, stats }: { issues: TechnicalIssue[]; stats: CompanyDetail["issueStats"] }) {
+export function TechnicalIssuesPanel({ issues, stats, companyId }: { issues: TechnicalIssue[]; stats: CompanyDetail["issueStats"]; companyId: string }) {
   const open = issues.filter((i) => i.status === "open");
   return (
     <div className="space-y-4">
@@ -391,50 +392,40 @@ export function TechnicalIssuesPanel({ issues, stats }: { issues: TechnicalIssue
             <Shield className="h-4 w-4 text-primary" />
             Technical SEO Audit
           </CardTitle>
-          <CardDescription>{open.length} open issues across {new Set(issues.map((i) => i.type)).size} categories</CardDescription>
+          <CardDescription>{open.length} open issues across {new Set(issues.map((i) => i.type)).size} categories · click "Get AI Fix" for LLM-powered recommendations</CardDescription>
         </CardHeader>
         <CardContent className="p-0">
-          <div className="max-h-[520px] overflow-y-auto rf-scroll">
-            <Table>
-              <TableHeader className="sticky top-0 bg-card">
-                <TableRow>
-                  <TableHead className="w-[60px]">Type</TableHead>
-                  <TableHead>Issue</TableHead>
-                  <TableHead className="text-center">Severity</TableHead>
-                  <TableHead className="text-right">Affected</TableHead>
-                  <TableHead className="text-center">Status</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {issues.map((issue) => {
-                  const cfg = severityConfig[issue.severity] ?? severityConfig.info;
-                  const Icon = cfg.icon;
-                  return (
-                    <TableRow key={issue.id} className="hover:bg-muted/40">
-                      <TableCell>
-                        <span className="text-lg" title={issue.type}>{typeIcons[issue.type] ?? "🔧"}</span>
-                      </TableCell>
-                      <TableCell>
-                        <div className="font-medium text-sm">{issue.title}</div>
-                        <div className="text-xs text-muted-foreground line-clamp-1">{issue.description}</div>
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="secondary" className={cn("text-[10px] font-medium", cfg.bg)}>
-                          <Icon className="h-3 w-3 mr-1" />
+          <div className="max-h-[600px] overflow-y-auto rf-scroll divide-y">
+            {issues.map((issue) => {
+              const cfg = severityConfig[issue.severity] ?? severityConfig.info;
+              const Icon = cfg.icon;
+              return (
+                <div key={issue.id} className="hover:bg-muted/20 transition-colors">
+                  <div className="flex items-start gap-3 px-4 py-3">
+                    <span className="text-lg shrink-0" title={issue.type}>{typeIcons[issue.type] ?? "🔧"}</span>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="font-medium text-sm">{issue.title}</span>
+                        <Badge variant="secondary" className={cn("text-[10px] font-medium gap-0.5", cfg.bg)}>
+                          <Icon className="h-2.5 w-2.5" />
                           {cfg.label}
                         </Badge>
-                      </TableCell>
-                      <TableCell className="text-right tabular-nums text-sm">{issue.affectedCount}</TableCell>
-                      <TableCell className="text-center">
-                        <Badge variant="outline" className={issue.status === "open" ? "border-amber-500/30 text-amber-600" : "border-emerald-500/30 text-emerald-600"}>
+                        <Badge variant="outline" className={cn("text-[10px]", issue.status === "open" ? "border-amber-500/30 text-amber-600" : "border-emerald-500/30 text-emerald-600")}>
                           {issue.status}
                         </Badge>
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
+                      </div>
+                      <div className="text-xs text-muted-foreground mt-1 line-clamp-2">{issue.description}</div>
+                      <div className="text-[10px] text-muted-foreground mt-1">{issue.affectedCount} pages affected · {issue.type}</div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <div className="text-[10px] text-muted-foreground uppercase tracking-wide">Affected</div>
+                      <div className="text-lg font-bold tabular-nums">{issue.affectedCount}</div>
+                    </div>
+                  </div>
+                  <IssueFixButton issue={issue} companyId={companyId} />
+                </div>
+              );
+            })}
           </div>
         </CardContent>
       </Card>

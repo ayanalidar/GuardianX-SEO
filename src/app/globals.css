@@ -262,3 +262,128 @@
 .rf-scroll-hidden {
   scrollbar-width: none;
 }
+
+/* ---------- Round 2 styling polish ---------- */
+
+/* Gradient border on hover for cards */
+.rf-gradient-border {
+  position: relative;
+  background: var(--card);
+  border-radius: var(--radius-lg);
+}
+.rf-gradient-border::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, oklch(0.62 0.14 158 / 0.4), oklch(0.7 0.13 195 / 0.4));
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+.rf-gradient-border:hover::before {
+  opacity: 1;
+}
+
+/* Glow pulse for important CTAs */
+@keyframes rf-glow-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 oklch(0.62 0.14 158 / 0.4); }
+  50% { box-shadow: 0 0 0 8px oklch(0.62 0.14 158 / 0); }
+}
+.rf-glow-pulse {
+  animation: rf-glow-pulse 2.5s ease-in-out infinite;
+}
+
+/* Floating animation for hero icons */
+@keyframes rf-float {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-6px); }
+}
+.rf-float {
+  animation: rf-float 3s ease-in-out infinite;
+}
+
+/* Shine sweep effect on buttons */
+.rf-shine {
+  position: relative;
+  overflow: hidden;
+}
+.rf-shine::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.2),
+    transparent
+  );
+  transition: left 0.6s;
+}
+.rf-shine:hover::after {
+  left: 100%;
+}
+
+/* Number flip-in */
+@keyframes rf-flip-in {
+  0% { opacity: 0; transform: translateY(8px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+.rf-flip-in {
+  animation: rf-flip-in 0.4s ease-out both;
+}
+
+/* Empty state illustration */
+.rf-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 1rem;
+  text-align: center;
+}
+
+/* Skeleton with shimmer (enhanced) */
+.rf-skeleton {
+  position: relative;
+  overflow: hidden;
+  background: var(--muted);
+}
+.rf-skeleton::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.08),
+    transparent
+  );
+  animation: rf-shimmer-sweep 1.8s infinite;
+}
+@keyframes rf-shimmer-sweep {
+  100% { transform: translateX(100%); }
+}
+
+/* Smooth tab indicator */
+[data-state="active"][role="tab"] {
+  position: relative;
+}
+[data-state="active"][role="tab"]::before {
+  content: "";
+  position: absolute;
+  bottom: -1px;
+  left: 20%;
+  right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--primary), transparent);
+  border-radius: 1px;
+}

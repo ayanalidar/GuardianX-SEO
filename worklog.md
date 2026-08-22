@@ -215,3 +215,62 @@ Unresolved / Next-phase recommendations:
 - Rank map could use a real geo SVG instead of stylized pins.
 - Add scheduled email digests for competitor alerts.
 - Add multi-company trend overlay in compare view.
+
+---
+Task ID: 13 (webDevReview round 2 — notifications, competitive radar, AI issue fixes, styling polish)
+Agent: main (Z.ai Code) — cron-triggered review
+Task: Assess project status, perform QA, fix bugs, and advance with new features + styling polish.
+
+## Current Project Status / Assessment
+- Project is stable and feature-rich: marketing site (4 pages), 17-tab dashboard, client portal with onboarding, 10 advanced feature modules, all lint-clean with no runtime errors.
+- QA via agent-browser confirmed: all 17 tabs render without errors, marketing flows work, auth flow works, mobile has no overflow, client portal renders.
+- No bugs found in this round — focused on new features + polish.
+
+## Current Goals / Completed Modifications / Verification Results
+
+Work Log:
+- Built **Notifications Center** (`/api/notifications` + `notifications-bell.tsx`):
+  - Aggregates competitor alerts (unread), achieved goals, overdue tasks, and new-client onboardings across ALL companies.
+  - Bell icon in dashboard header with animated unread count badge; click opens a dropdown with time-ago timestamps, severity-colored icons, company logos; "View all in dashboard" footer.
+  - Click-outside-to-close, AnimatePresence transitions.
+- Built **Competitive Landscape Radar** (`competitive-radar.tsx`):
+  - Recharts RadarChart comparing the company vs top 4 competitors across 6 normalized dimensions (Traffic, Authority, Visibility, Keywords, Backlinks, Position).
+  - Includes a leaderboard grid with avg scores + crown on the leader.
+  - Added as a new "Landscape" tab (dashboard now has 17 tabs).
+- Built **AI Issue Fix Suggestions** (`/api/companies/[id]/issues/[issueId]/fix` + `issue-fix-button.tsx`):
+  - LLM-powered: for each technical issue, generates a summary, 4-6 implementation steps, estimated impact, priority, and resources.
+  - Rebuilt the TechnicalIssuesPanel from a table to an expandable card list; each issue has a "Get AI Fix" button that expands an animated panel with the LLM recommendation.
+  - Verified: POST returns 200 in ~3.8s with full structured JSON.
+- Added **styling polish** to `globals.css`:
+  - `rf-gradient-border` — animated gradient border on hover (applied to company cards).
+  - `rf-shine` — shine sweep effect on buttons (applied to hero CTA).
+  - `rf-float` — floating animation for hero icons.
+  - `rf-glow-pulse` — pulsing glow for important CTAs.
+  - `rf-flip-in` — number flip-in animation.
+  - `rf-skeleton` — enhanced shimmer skeleton.
+  - Smooth tab indicator with gradient underline.
+  - `rf-empty-state` utility.
+- Applied polish: company cards now use gradient-border + lift on hover; marketing hero CTA has shine sweep + floating rocket icon.
+
+Verification:
+- Notifications API returns 30 notifications (goal achievements, new onboardings, competitor alerts).
+- Notifications bell dropdown renders correctly with all notification types.
+- Competitive Landscape radar renders with 6 dimensions + leaderboard.
+- AI Issue Fix generates real LLM recommendations (Summary, Steps, Impact, Resources).
+- Mobile: no horizontal overflow. Lint: clean (0 errors). No console/page errors.
+
+Stage Summary:
+- **3 new features**: Notifications Center, Competitive Landscape Radar, AI Issue Fix Suggestions.
+- **2 new API routes**: `/api/notifications`, `POST /api/companies/[id]/issues/[issueId]/fix`.
+- **Dashboard tabs**: 16 → 17 (added Landscape).
+- **Styling**: gradient borders, shine sweep, floating icons, enhanced skeletons, tab indicators.
+- **Lint**: clean. **Verification**: all tested via agent-browser.
+
+## Unresolved Issues / Risks + Next-phase Recommendations
+- Command Palette (⌘K quick actions) and Performance Budget Tracker were planned but deferred — good candidates for next round.
+- Client portal could gain its own Landscape radar + notifications.
+- Real NextAuth authentication (currently mock sign-in).
+- d3-force for larger internal link graphs.
+- Real geo SVG for rank map.
+- Scheduled email digests for alerts.
+- Multi-company trend overlay in compare view.
