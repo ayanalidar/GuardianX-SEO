@@ -470,3 +470,74 @@
   opacity: 0.025;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' /%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' /%3E%3C/svg%3E");
 }
+
+/* ---------- Round 4 polish ---------- */
+
+/* Gradient divider */
+.rf-gradient-divider {
+  height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border), transparent);
+}
+
+/* Section heading with gradient accent line */
+.rf-section-heading {
+  position: relative;
+  padding-left: 12px;
+}
+.rf-section-heading::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  height: 70%;
+  width: 3px;
+  border-radius: 2px;
+  background: linear-gradient(180deg, oklch(0.62 0.14 158), oklch(0.7 0.13 195));
+}
+
+/* Hover lift utility for any card */
+.rf-lift {
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+.rf-lift:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 32px -8px rgba(0, 0, 0, 0.12), 0 4px 12px -4px rgba(0, 0, 0, 0.06);
+}
+
+/* Pulse ring for score badges */
+@keyframes rf-badge-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 currentColor; opacity: 1; }
+  50% { box-shadow: 0 0 0 4px transparent; opacity: 0.85; }
+}
+.rf-badge-pulse {
+  animation: rf-badge-pulse 2s ease-in-out infinite;
+}
+
+/* Gradient text for emphasis */
+.rf-text-gradient {
+  background: linear-gradient(135deg, oklch(0.55 0.16 158), oklch(0.6 0.15 180));
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Subtle border glow on focus for inputs */
+.rf-input-glow:focus-visible {
+  box-shadow: 0 0 0 3px oklch(0.62 0.14 158 / 0.15);
+}
+
+/* Animated dot grid background for empty states */
+.rf-dot-grid {
+  background-image: radial-gradient(circle, var(--muted-foreground) 0.5px, transparent 0.5px);
+  background-size: 16px 16px;
+  opacity: 0.3;
+}
+
+/* Smooth scale on icon hover */
+.rf-icon-scale {
+  transition: transform 0.2s ease;
+}
+.rf-icon-scale:hover {
+  transform: scale(1.15);
+}

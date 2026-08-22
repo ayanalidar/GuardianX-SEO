@@ -181,7 +181,7 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
 
           {/* Score breakdown bar */}
           <div className="mt-6 pt-6 border-t">
-            <div className="text-xs uppercase tracking-wide text-muted-foreground font-medium mb-3">
+            <div className="text-xs uppercase tracking-wide text-muted-foreground font-medium mb-3 rf-section-heading">
               Score Breakdown
             </div>
             <div className="grid grid-cols-2 md:grid-cols-5 gap-3">

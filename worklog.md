@@ -373,3 +373,57 @@ Stage Summary:
 - Real geo SVG for rank map.
 - Scheduled email digests for alerts + forecast summaries.
 - Animated KPI card transitions + progress ring fills (styling polish deferred).
+
+---
+Task ID: 16 (webDevReview round 5 — portal enhancements, animated KPI cards, styling polish)
+Agent: main (Z.ai Code) — cron-triggered review
+Task: Assess project status, perform QA, fix bugs, advance with new features + styling polish.
+
+## Current Project Status / Assessment
+- Project is stable: marketing site (4 pages), 18-tab dashboard, client portal, 15+ feature modules, all lint-clean.
+- QA via agent-browser: all 18 tabs render without errors, portal works, compare works, mobile has no overflow.
+- No bugs found — focused on portal enhancements + styling polish.
+
+## Current Goals / Completed Modifications / Verification Results
+
+Work Log:
+- Enhanced **Client Portal** with two new sections:
+  - Added `CompetitiveRadar` (the same 6-dimension radar used in the dashboard) to the portal — clients can now see how they compare to competitors.
+  - Added `SeoForecast` (AI-powered 90-day projections) to the portal — clients can generate their own forecasts.
+  - Both wrapped in `Reveal` scroll-triggered animations, placed after the Score Breakdown card.
+- Enhanced **StatCard** with cinematic animations:
+  - Spring-in icon entrance (scale + opacity).
+  - Flip-in value animation (`rf-flip-in`).
+  - Spring-in delta badge.
+  - Hover glow (accent-colored blur on hover) + gradient border (`rf-gradient-border`).
+  - Optional `progress` prop → animated thin progress bar at the bottom.
+  - Hover lift (`hover:-translate-y-0.5` + shadow).
+- Added **styling polish** to `globals.css`:
+  - `rf-gradient-divider` — gradient horizontal divider.
+  - `rf-section-heading` — left accent bar (gradient) for section headings (applied to Score Breakdown).
+  - `rf-lift` — hover lift utility with shadow (applied to platform stat cards).
+  - `rf-badge-pulse` — pulsing badge animation.
+  - `rf-text-gradient` — gradient text for emphasis.
+  - `rf-input-glow` — focus ring glow for inputs.
+  - `rf-dot-grid` — dot grid background for empty states.
+  - `rf-icon-scale` — smooth icon hover scale.
+- Applied: platform stat cards use `rf-lift`; company detail score breakdown uses `rf-section-heading`.
+
+Verification:
+- Client portal: "Competitive Landscape" radar + "SEO Forecasting" section both render (verified via snapshot).
+- Dashboard KPI cards: render with new styling (spring icons, flip-in values, hover glow).
+- All 18 tabs render without errors.
+- Mobile: no horizontal overflow. Lint: clean (0 errors). No console/page errors.
+
+Stage Summary:
+- **Portal enhancements**: +Competitive Radar, +SEO Forecast sections (clients now have the same analytical power as the main dashboard).
+- **Animated KPI cards**: spring-in icons, flip-in values, hover glow, optional progress bars.
+- **Styling**: gradient dividers, section heading accents, hover lift, badge pulse, dot grid, input glow.
+- **Lint**: clean. **Verification**: all tested via agent-browser.
+
+## Unresolved Issues / Risks + Next-phase Recommendations
+- Global search enhancement (add navigation actions to search dialog) deferred.
+- Real NextAuth authentication (currently mock sign-in).
+- d3-force for larger internal link graphs.
+- Real geo SVG for rank map.
+- Scheduled email digests for alerts + forecast summaries.

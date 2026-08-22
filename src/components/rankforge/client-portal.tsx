@@ -8,6 +8,8 @@ import {
   AnimatedCounter, AnimatedScoreRing, CinematicBackground,
   Reveal, StaggerContainer, StaggerItem,
 } from "@/components/rankforge/motion";
+import { CompetitiveRadar } from "./features/competitive-radar";
+import { SeoForecast } from "./features/seo-forecast";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -433,6 +435,16 @@ export function ClientPortal({ token }: { token: string }) {
               </div>
             </CardContent>
           </Card>
+        </Reveal>
+
+        {/* Competitive Landscape */}
+        <Reveal>
+          <CompetitiveRadar companyName={company.name} latest={latest} competitors={data.competitors} />
+        </Reveal>
+
+        {/* AI Forecast */}
+        <Reveal>
+          <SeoForecast companyId={company.id} />
         </Reveal>
 
         {/* Quick stats footer */}
