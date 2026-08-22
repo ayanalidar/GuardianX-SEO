@@ -4,8 +4,17 @@ const globalForPrisma = globalThis as unknown as {
   prisma: PrismaClient | undefined
 }
 
-// Recreate the client if the cached instance is missing newer models
-// (happens after a schema change + prisma generate while the dev server runs)
+// Validate the cached client has all expected models (recreate if schema changed)
+function hasAllModels(client: PrismaClient): boolean {
+  return (
+    typeof (client as any).coreWebVital === 'object' &&
+    typeof (client as any).serpFeature === 'object' &&
+    typeof (client as any).client === 'object' &&
+    typeof (client as any).clientGoal === 'object' &&
+    typeof (client as any).clientTask === 'object'
+  )
+}
+
 function createPrisma(): PrismaClient {
   return new PrismaClient({
     log: ['error', 'warn'],
@@ -14,8 +23,7 @@ function createPrisma(): PrismaClient {
 
 function getPrisma(): PrismaClient {
   const cached = globalForPrisma.prisma
-  // Validate the cached client has the expected models; otherwise recreate
-  if (cached && typeof (cached as any).coreWebVital === 'object') {
+  if (cached && hasAllModels(cached)) {
     return cached
   }
   const client = createPrisma()
@@ -26,6 +34,5 @@ function getPrisma(): PrismaClient {
 export const db = getPrisma()
 
 if (process.env.NODE_ENV !== 'production') {
-  // Keep the global in sync so HMR doesn't leak instances
   globalForPrisma.prisma = db
 }

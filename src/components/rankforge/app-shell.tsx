@@ -8,6 +8,7 @@ import { Overview } from "./overview";
 import { CompanyDetail } from "./company-detail";
 import { SearchDialog } from "./search-dialog";
 import { CompareView, CompareBar } from "./compare-view";
+import { OnboardingWizard } from "./onboarding-wizard";
 import { useNav } from "@/store/nav";
 import { useFetch } from "@/lib/seo/hooks";
 import { DomainWithCompanies } from "@/lib/seo/types";
@@ -88,6 +89,7 @@ export function AppShell() {
       <Footer />
       <SearchDialog />
       <CompareBar domains={domains} />
+      <OnboardingWizard />
     </div>
   );
 }

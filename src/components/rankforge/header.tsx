@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Search, Sun, Moon, Rocket, Command, GitCompare } from "lucide-react";
+import { Search, Sun, Moon, Rocket, Command, GitCompare, UserPlus } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useNav } from "@/store/nav";
 import { cn } from "@/lib/utils";
@@ -12,6 +12,7 @@ export function Header() {
   const backToOverview = useNav((s) => s.backToOverview);
   const compareMode = useNav((s) => s.compareMode);
   const toggleCompareMode = useNav((s) => s.toggleCompareMode);
+  const setOnboarding = useNav((s) => s.setOnboarding);
   const view = useNav((s) => s.view);
 
   const toggleTheme = () => {
@@ -65,18 +66,28 @@ export function Header() {
         </Button>
 
         {showCompareBtn && (
-          <Button
-            variant={compareMode ? "default" : "outline"}
-            size="sm"
-            onClick={toggleCompareMode}
-            className={cn(
-              "gap-1.5 hidden sm:flex",
-              compareMode && "bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-0"
-            )}
-          >
-            <GitCompare className="h-4 w-4" />
-            <span className="hidden lg:inline">Compare</span>
-          </Button>
+          <>
+            <Button
+              variant={compareMode ? "default" : "outline"}
+              size="sm"
+              onClick={toggleCompareMode}
+              className={cn(
+                "gap-1.5 hidden sm:flex",
+                compareMode && "bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-0"
+              )}
+            >
+              <GitCompare className="h-4 w-4" />
+              <span className="hidden lg:inline">Compare</span>
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => setOnboarding(true)}
+              className="gap-1.5 bg-gradient-to-r from-emerald-500 to-teal-600 text-white hidden sm:flex"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span className="hidden lg:inline">Onboard Client</span>
+            </Button>
+          </>
         )}
 
         <Button

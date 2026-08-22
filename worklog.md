@@ -95,3 +95,70 @@ Unresolved / Next-phase recommendations:
 - Add a "trend comparison" chart in the compare view (overlay traffic lines).
 - Add PDF report export (beyond CSV).
 - Consider a saved-comparisons feature (persist named comparison sets).
+
+---
+Task ID: 11 (cinematic frontend + client onboarding + unique client links)
+Agent: main (Z.ai Code)
+Task: Build advanced frontend with in-depth cinematic infographic animations, client onboarding with separate dashboard for each, and a unique link per client to manage/optimize their business.
+
+Work Log:
+- Read worklog.md to understand prior state (10 domains, 50 companies, 9-tab dashboard, compare view, CWV + SERP panels).
+- Extended Prisma schema with 3 new models:
+  - `Client` — a client/owner of a company with `token` (unique cuid for shareable link), name, email, role, primaryGoal, targetKeywords/Traffic/DA, onboardedAt, lastVisit. One-to-one with Company.
+  - `ClientGoal` — goal tracking (type, label, target, current, deadline, status). Linked to Client.
+  - `ClientTask` — action tasks/to-do (title, description, category, priority, status, dueDate). Linked to Client.
+- Pushed schema + generated Prisma client.
+- Built 4 new API routes:
+  - `POST /api/onboard` — creates Company + Client in a transaction, seeds 30 days of baseline metrics (trending up from low base), creates 4 default goals (traffic/keywords/authority/position) derived from targets, and 8 default tasks based on the primary goal + industry.
+  - `GET /api/client/[token]` — full client portal data (mirrors company detail + client info + goals with live progress + tasks). Updates `lastVisit` on access.
+  - `GET/POST/PATCH/DELETE /api/client/[token]/goals` — goal CRUD.
+  - `GET/POST/PATCH/DELETE /api/client/[token]/tasks` — task CRUD with status cycling.
+- Built cinematic animation primitives in `src/components/rankforge/motion.tsx` (framer-motion):
+  - `AnimatedCounter` — ticks up from 0 to value when scrolled into view (spring physics).
+  - `AnimatedScoreRing` — SVG ring that fills cinematically with delay, color-coded by grade.
+  - `Reveal` — scroll-triggered fade-up wrapper.
+  - `StaggerContainer` / `StaggerItem` — staggered list animations.
+  - `CinematicBackground` — 3 variants (orbs, grid, mesh) with floating animated gradient blobs.
+- Rebuilt the Overview hero with cinematic animations: animated mesh background, staggered entrance for badge/headline/subtitle/CTA, animated platform stat counters (traffic/keywords/backlinks/DA tick up on view), "Onboard a Client" CTA button with gradient + hover lift.
+- Applied scroll-reveal + stagger to domain sections and company card grids.
+- Built a multi-step **Onboarding Wizard** (`onboarding-wizard.tsx`):
+  - Step 1: Business info (name, website, industry, location, employees, founded year, description, domain category as icon grid).
+  - Step 2: Client contact (name, email, phone, role as pill selector).
+  - Step 3: Goals & targets (4 primary-goal cards with icons, target traffic/keywords/DA inputs).
+  - Animated step progress bar with check icons; AnimatePresence transitions between steps.
+  - Success screen: animated check spring-in, displays the unique portal link with copy button, and "Open Portal" / "View Dashboard" CTAs.
+- Built the **Client Portal** at `/portal/[token]` (`client-portal.tsx` + `app/portal/[token]/page.tsx`):
+  - Separate layout (own header with Share + Visit Site, no domain tabs) — a dedicated dashboard per client.
+  - Welcome hero with animated score ring, client name, primary goal, onboarding date.
+  - 6 animated KPI cards (counters tick up on view).
+  - Goal Tracking card with animated progress bars (live progress computed from latest metrics; achieved goals get a check icon).
+  - Action Plan card with task filter (all/todo/in-progress/done), overall progress bar, and click-to-cycle task status (todo→in-progress→done) persisted via PATCH API.
+  - SEO Score Breakdown with animated per-component bars.
+  - Mini stats footer (open issues, SERP features, CWV avg score).
+  - Custom portal footer.
+- Added "Onboard Client" button to the header (gradient, with UserPlus icon) next to Compare.
+- Added `setOnboarding` action to the Zustand nav store + `onboarding` state.
+- Fixed Prisma client cache issue: updated `src/lib/db.ts` `hasAllModels()` validation to check ALL new models (coreWebVital, serpFeature, client, clientGoal, clientTask) and recreate the client if any are missing. Required dev server restart to pick up the regenerated client (the sandbox process reaper kills backgrounded processes between Bash calls).
+- Verified end-to-end with agent-browser:
+  - Cinematic hero renders with animated counters and mesh background.
+  - Onboarding wizard: completed full 3-step flow (Pixel Forge Studio → E-Commerce → Arjun Mehta → Increase organic traffic) → success screen with unique portal link.
+  - Client portal at `/portal/[token]` loads with welcome hero, animated score ring, 6 KPI cards, goals with progress bars, tasks with click-to-cycle status, score breakdown.
+  - Mobile (390×844): no horizontal overflow.
+  - Direct API test: `POST /api/onboard` returns `{"success":true,"companyId":...,"clientToken":...,"portalUrl":"/portal/..."}`. Portal page + client API both return 200.
+- Lint: clean (0 errors, 0 warnings). No console/page errors.
+
+Stage Summary:
+- **New models**: Client, ClientGoal, ClientTask (with shareable token-based portal access).
+- **New routes**: `POST /api/onboard`, `/api/client/[token]` (GET), `/api/client/[token]/goals` (CRUD), `/api/client/[token]/tasks` (CRUD), `/portal/[token]` (client portal page).
+- **Cinematic animations**: animated counters (spring physics), animated score ring fill, scroll-reveal wrappers, staggered containers, 3 cinematic background variants (orbs/grid/mesh), animated step progress bar, success-screen spring-in.
+- **Client onboarding**: 3-step wizard → creates Company + Client + 30-day metrics + 4 goals + 8 tasks → generates unique `/portal/[token]` link.
+- **Client portal**: dedicated dashboard per client with goals tracking (live progress), action plan (click-to-cycle tasks), score breakdown, KPI cards — all with cinematic animations.
+- **Lint**: clean. **Verification**: full flow tested via agent-browser (onboard → portal). Mobile-responsive.
+
+Unresolved / Next-phase recommendations:
+- Client portal currently reuses company dashboard tabs; could add a portal-specific deep-dive (keywords/backlinks) with client-friendly framing.
+- Add client authentication (currently token-only; could add email/PIN gate).
+- Add email notifications when goals are achieved or tasks become overdue.
+- Add a client-side "request audit" / "contact SEO team" feature.
+- Add PDF report export branded per client.
+- Consider a cinematic "loading reveal" sequence when a portal first loads (staggered number reveals).

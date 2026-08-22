@@ -12,6 +12,7 @@ interface NavState {
   searchOpen: boolean;
   compareMode: boolean;
   compareIds: string[];
+  onboarding: boolean;
   setDomain: (slug: string) => void;
   openCompany: (
     companyId: string,
@@ -24,6 +25,7 @@ interface NavState {
   toggleCompareId: (id: string) => void;
   clearCompare: () => void;
   openCompare: (ids: string[]) => void;
+  setOnboarding: (open: boolean) => void;
 }
 
 export const useNav = create<NavState>((set) => ({
@@ -31,6 +33,7 @@ export const useNav = create<NavState>((set) => ({
   searchOpen: false,
   compareMode: false,
   compareIds: [],
+  onboarding: false,
   setDomain: (slug) =>
     set({ view: { kind: "overview", domainSlug: slug } }),
   openCompany: (companyId, companySlug, domainSlug) =>
@@ -60,4 +63,5 @@ export const useNav = create<NavState>((set) => ({
   clearCompare: () => set({ compareIds: [], compareMode: false }),
   openCompare: (ids) =>
     set({ view: { kind: "compare", companyIds: ids }, compareMode: false }),
+  setOnboarding: (open) => set({ onboarding: open }),
 }));

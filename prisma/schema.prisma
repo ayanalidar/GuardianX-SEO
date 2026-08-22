@@ -48,8 +48,67 @@ model Company {
   insights    SeoInsight[]
   webVitals   CoreWebVital[]
   serpFeatures SerpFeature[]
+  client      Client?
 
   @@unique([domainId, slug])
+}
+
+// A client/owner of a company — onboarded via the wizard, gets a unique portal link
+model Client {
+  id           String   @id @default(cuid())
+  companyId    String   @unique
+  name         String
+  email        String
+  phone        String?
+  role         String   @default("Owner") // Owner | Marketing Manager | SEO Specialist | Agency
+  token        String   @unique @default(cuid()) // unique shareable link token
+  primaryGoal  String   // Increase organic traffic | Rank #1 for keywords | Grow backlinks | Improve technical SEO
+  targetKeywords Int    @default(50)
+  targetTraffic  Int    @default(0)
+  targetDA       Float  @default(0)
+  onboardedAt  DateTime @default(now())
+  lastVisit    DateTime?
+
+  company      Company    @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  goals        ClientGoal[]
+  tasks        ClientTask[]
+
+  @@index([email])
+}
+
+// Client-set goals with target + current progress
+model ClientGoal {
+  id          String   @id @default(cuid())
+  clientId    String
+  type        String   // traffic | keywords | backlinks | authority | position | visibility
+  label       String
+  target      Float
+  current     Float
+  deadline    DateTime?
+  status      String   @default("active") // active | achieved | overdue
+  createdAt   DateTime @default(now())
+
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
+}
+
+// Client action tasks / to-do list
+model ClientTask {
+  id          String   @id @default(cuid())
+  clientId    String
+  title       String
+  description String?
+  category    String   @default("optimization") // optimization | content | technical | outreach | monitoring
+  priority    String   @default("medium") // high | medium | low
+  status      String   @default("todo") // todo | in-progress | done
+  dueDate     DateTime?
+  createdAt   DateTime @default(now())
+  completedAt DateTime?
+
+  client      Client   @relation(fields: [clientId], references: [id], onDelete: Cascade)
+
+  @@index([clientId])
 }
 
 // Time-series SEO metric snapshot (one per day per company)
