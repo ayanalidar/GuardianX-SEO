@@ -62,6 +62,9 @@ export function TrafficChart({ metrics }: { metrics: SeoMetric[] }) {
           stroke={CHART_COLORS.emerald}
           strokeWidth={2.5}
           fill="url(#trafficGrad)"
+          isAnimationActive
+          animationDuration={1200}
+          animationEasing="ease-out"
         />
       </AreaChart>
     </ResponsiveContainer>
@@ -82,8 +85,8 @@ export function VisibilityChart({ metrics }: { metrics: SeoMetric[] }) {
         <YAxis yAxisId="left" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} width={36} domain={[0, 100]} />
         <YAxis yAxisId="right" orientation="right" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} width={36} domain={[0, 50]} />
         <Tooltip contentStyle={tooltipStyle} />
-        <Line yAxisId="left" type="monotone" dataKey="visibility" stroke={CHART_COLORS.teal} strokeWidth={2.5} dot={false} name="Visibility %" />
-        <Line yAxisId="right" type="monotone" dataKey="position" stroke={CHART_COLORS.amber} strokeWidth={2} dot={false} strokeDasharray="4 4" name="Avg Position" />
+        <Line yAxisId="left" type="monotone" dataKey="visibility" stroke={CHART_COLORS.teal} strokeWidth={2.5} dot={false} name="Visibility %" isAnimationActive animationDuration={1200} animationEasing="ease-out" />
+        <Line yAxisId="right" type="monotone" dataKey="position" stroke={CHART_COLORS.amber} strokeWidth={2} dot={false} strokeDasharray="4 4" name="Avg Position" isAnimationActive animationDuration={1400} animationEasing="ease-out" />
       </LineChart>
     </ResponsiveContainer>
   );
@@ -100,7 +103,7 @@ export function PositionDistribution({ buckets }: { buckets: number[] }) {
         <XAxis dataKey="name" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} />
         <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} width={32} />
         <Tooltip contentStyle={tooltipStyle} cursor={{ fill: "var(--muted)" }} />
-        <Bar dataKey="value" radius={[6, 6, 0, 0]}>
+        <Bar dataKey="value" radius={[6, 6, 0, 0]} isAnimationActive animationDuration={1000} animationEasing="ease-out">
           {data.map((d, i) => (
             <Cell key={i} fill={d.color} />
           ))}
@@ -129,8 +132,8 @@ export function AuthorityChart({ metrics }: { metrics: SeoMetric[] }) {
         <XAxis dataKey="date" stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} minTickGap={24} />
         <YAxis stroke="var(--muted-foreground)" fontSize={11} tickLine={false} axisLine={false} width={32} domain={[0, 100]} />
         <Tooltip contentStyle={tooltipStyle} />
-        <Area type="monotone" dataKey="DA" stroke={CHART_COLORS.violet} strokeWidth={2.5} fill="url(#daGrad)" name="Domain Authority" />
-        <Line type="monotone" dataKey="PA" stroke={CHART_COLORS.cyan} strokeWidth={2} dot={false} name="Page Authority" />
+        <Area type="monotone" dataKey="DA" stroke={CHART_COLORS.violet} strokeWidth={2.5} fill="url(#daGrad)" name="Domain Authority" isAnimationActive animationDuration={1200} animationEasing="ease-out" />
+        <Line type="monotone" dataKey="PA" stroke={CHART_COLORS.cyan} strokeWidth={2} dot={false} name="Page Authority" isAnimationActive animationDuration={1400} animationEasing="ease-out" />
       </AreaChart>
     </ResponsiveContainer>
   );
@@ -159,6 +162,9 @@ export function BacklinkTypeChart({
           innerRadius={48}
           outerRadius={70}
           paddingAngle={3}
+          isAnimationActive
+          animationDuration={1000}
+          animationEasing="ease-out"
         >
           {data.map((d, i) => (
             <Cell key={i} fill={d.color} />
@@ -197,6 +203,8 @@ export function KeywordTrendSparkline({ trend }: { trend: string }) {
           stroke={CHART_COLORS.emerald}
           strokeWidth={1.5}
           dot={false}
+          isAnimationActive
+          animationDuration={800}
         />
         <YAxis hide domain={["dataMin", "dataMax"]} />
       </LineChart>

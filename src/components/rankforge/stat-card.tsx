@@ -28,7 +28,7 @@ export function StatCard({
   const negative = hasDelta && delta! < 0;
   const TrendIcon = positive ? TrendingUp : negative ? TrendingDown : Minus;
   return (
-    <Card className="group relative p-4 gap-2 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 overflow-hidden rf-gradient-border">
+    <Card className="group relative p-4 gap-2 hover:shadow-lg hover:-translate-y-0.5 transition-all duration-300 overflow-hidden rf-gradient-border rf-glass-card">
       {/* subtle accent glow on hover */}
       <div
         className="absolute -top-8 -right-8 h-20 w-20 rounded-full opacity-0 group-hover:opacity-20 blur-2xl transition-opacity"

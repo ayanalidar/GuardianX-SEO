@@ -91,7 +91,7 @@ export function CompetitiveRadar({
             <PolarAngleAxis dataKey="dim" tick={{ fill: "var(--muted-foreground)", fontSize: 11 }} />
             <PolarRadiusAxis domain={[0, 100]} tick={{ fill: "var(--muted-foreground)", fontSize: 9 }} angle={90} />
             <Tooltip contentStyle={tooltipStyle} formatter={(v: number) => [Math.round(v), "Score"]} />
-            <Radar name={companyName} dataKey="company" stroke={COLORS[0]} fill={COLORS[0]} fillOpacity={0.35} strokeWidth={2} />
+            <Radar name={companyName} dataKey="company" stroke={COLORS[0]} fill={COLORS[0]} fillOpacity={0.35} strokeWidth={2} isAnimationActive animationDuration={1200} animationEasing="ease-out" />
             {competitors.slice(0, 4).map((c, i) => (
               <Radar
                 key={i}
@@ -101,6 +101,10 @@ export function CompetitiveRadar({
                 fill={COLORS[i + 1]}
                 fillOpacity={0.08}
                 strokeWidth={1.5}
+                isAnimationActive
+                animationDuration={1200}
+                animationBegin={(i + 1) * 200}
+                animationEasing="ease-out"
               />
             ))}
             <Legend wrapperStyle={{ fontSize: 11 }} iconType="circle" iconSize={8} />

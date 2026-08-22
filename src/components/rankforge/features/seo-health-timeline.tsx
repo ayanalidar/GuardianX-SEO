@@ -162,6 +162,9 @@ export function SeoHealthTimeline({ metrics }: { metrics: SeoMetric[] }) {
                 stroke={cfg.color}
                 strokeWidth={2.5}
                 fill="url(#timelineGrad)"
+                isAnimationActive
+                animationDuration={1000}
+                animationEasing="ease-out"
               />
             </ComposedChart>
           </ResponsiveContainer>

@@ -686,3 +686,56 @@
   box-shadow: 0 0 0 3px oklch(0.62 0.14 158 / 0.2);
   outline: none;
 }
+
+/* ---------- Round 7 polish ---------- */
+
+/* Glassmorphic stat card */
+.rf-glass-card {
+  background: oklch(1 0 0 / 0.7);
+  backdrop-filter: blur(12px) saturate(180%);
+  border: 1px solid oklch(0.91 0.01 160 / 0.6);
+  box-shadow: 0 4px 16px -4px rgba(0, 0, 0, 0.06);
+}
+.dark .rf-glass-card {
+  background: oklch(0.22 0.018 165 / 0.7);
+  border-color: oklch(1 0 0 / 0.08);
+}
+
+/* Gradient progress bar track */
+.rf-progress-track {
+  background: linear-gradient(90deg, oklch(0.91 0.01 160), oklch(0.94 0.01 160));
+}
+.dark .rf-progress-track {
+  background: linear-gradient(90deg, oklch(0.26 0.02 165), oklch(0.3 0.02 165));
+}
+
+/* Animated progress fill with shimmer */
+.rf-progress-fill {
+  position: relative;
+  overflow: hidden;
+}
+.rf-progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    oklch(1 0 0 / 0.3),
+    transparent
+  );
+  transform: translateX(-100%);
+  animation: rf-progress-shimmer 2s infinite;
+}
+@keyframes rf-progress-shimmer {
+  100% { transform: translateX(100%); }
+}
+
+/* Hover depth for interactive elements */
+.rf-hover-depth {
+  transition: all 0.25s ease;
+}
+.rf-hover-depth:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, 0.12);
+}

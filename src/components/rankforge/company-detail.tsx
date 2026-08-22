@@ -225,9 +225,9 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
                   <div className="mt-1 text-lg font-bold tabular-nums" style={{ color: scoreGrade(b.score).color }}>
                     {b.score}
                   </div>
-                  <div className="mt-1 h-1.5 rounded-full bg-muted overflow-hidden">
+                  <div className="mt-1 h-1.5 rounded-full rf-progress-track overflow-hidden">
                     <div
-                      className="h-full rounded-full transition-all"
+                      className="h-full rounded-full transition-all rf-progress-fill"
                       style={{ width: `${b.score}%`, backgroundColor: scoreGrade(b.score).color }}
                     />
                   </div>

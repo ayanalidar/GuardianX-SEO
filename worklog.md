@@ -616,3 +616,55 @@ Stage Summary:
 - Real geo SVG for rank map.
 - Scheduled email digests for alerts + forecast summaries.
 - Glassmorphic stat cards + gradient progress bars (styling polish deferred).
+
+---
+Task ID: 21 (webDevReview round 10 — animated charts, glassmorphic cards, gradient progress)
+Agent: main (Z.ai Code) — cron-triggered review
+Task: Assess project status, perform QA, fix bugs, advance with new features + styling polish.
+
+## Current Project Status / Assessment
+- Project is stable: marketing site (4 pages), 18-tab dashboard, client portal (with radar + forecast), 22+ feature modules, all lint-clean.
+- QA via agent-browser: all 18 tabs render without errors, sparklines render, export works, mobile has no overflow.
+- No bugs found — focused on animated chart entrances + glassmorphic stat cards + gradient progress bars.
+
+## Current Goals / Completed Modifications / Verification Results
+
+Work Log:
+- Added **animated chart entrances** to all Recharts components:
+  - `TrafficChart` (AreaChart) — 1200ms ease-out animation.
+  - `VisibilityChart` (LineChart) — visibility 1200ms, position 1400ms (staggered).
+  - `PositionDistribution` (BarChart) — 1000ms ease-out.
+  - `AuthorityChart` (AreaChart + Line) — DA 1200ms, PA 1400ms.
+  - `BacklinkTypeChart` (PieChart) — 1000ms ease-out.
+  - `KeywordTrendSparkline` (LineChart) — 800ms.
+  - `SeoHealthTimeline` (ComposedChart Area) — 1000ms.
+  - `CompetitiveRadar` (RadarChart) — company 1200ms, competitors staggered with 200ms begin offsets.
+  - All use `isAnimationActive`, `animationDuration`, `animationEasing="ease-out"`.
+- Added **glassmorphic stat cards** (`rf-glass-card` CSS):
+  - Backdrop-blur + saturate(180%) for a frosted-glass effect.
+  - Applied to the StatCard component (used for KPI cards in company detail).
+  - Light + dark variants.
+- Added **gradient progress bars** (`rf-progress-track` + `rf-progress-fill`):
+  - Gradient track background (light + dark variants).
+  - Animated shimmer sweep on the fill (`rf-progress-shimmer` keyframes).
+  - Applied to the company detail score breakdown bars.
+- Added **hover depth** utility (`rf-hover-depth`) — translateY + shadow on hover.
+
+Verification:
+- Animated charts: all render without errors; screenshots captured for Overview + Landscape tabs.
+- Glassmorphic stat cards: applied to KPI cards.
+- Gradient progress bars: applied to score breakdown with shimmer animation.
+- All 18 tabs render without errors.
+- Mobile: no horizontal overflow. Lint: clean (0 errors). No console/page errors.
+
+Stage Summary:
+- **3 enhancements**: Animated chart entrances (8 chart types), Glassmorphic stat cards, Gradient progress bars with shimmer.
+- **Styling**: glassmorphic cards, gradient progress tracks, shimmer fills, hover depth.
+- **Lint**: clean. **Verification**: all tested via agent-browser.
+
+## Unresolved Issues / Risks + Next-phase Recommendations
+- Competitor gap analysis (keywords all competitors rank for that you don't) — deferred.
+- Real NextAuth authentication (currently mock sign-in).
+- d3-force for larger internal link graphs.
+- Real geo SVG for rank map.
+- Scheduled email digests for alerts + forecast summaries.
