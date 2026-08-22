@@ -10,6 +10,7 @@ import { SearchDialog } from "./search-dialog";
 import { CompareView, CompareBar } from "./compare-view";
 import { OnboardingWizard } from "./onboarding-wizard";
 import { CommandPalette } from "./command-palette";
+import { ShortcutsOverlay } from "./shortcuts-overlay";
 import { MarketingSite } from "./marketing/marketing-site";
 import { useNav } from "@/store/nav";
 import { useFetch } from "@/lib/seo/hooks";
@@ -78,6 +79,7 @@ export function AppShell() {
         <SearchDialog />
         <OnboardingWizard />
         <CommandPalette domains={domains} />
+        <ShortcutsOverlay />
       </>
     );
   }
@@ -115,6 +117,7 @@ export function AppShell() {
       <CompareBar domains={domains} />
       <OnboardingWizard />
       <CommandPalette domains={domains} />
+      <ShortcutsOverlay />
     </div>
   );
 }

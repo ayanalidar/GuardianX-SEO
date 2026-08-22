@@ -427,3 +427,54 @@ Stage Summary:
 - d3-force for larger internal link graphs.
 - Real geo SVG for rank map.
 - Scheduled email digests for alerts + forecast summaries.
+
+---
+Task ID: 17 (webDevReview round 6 — search enhancement, shortcuts overlay, styling polish)
+Agent: main (Z.ai Code) — cron-triggered review
+Task: Assess project status, perform QA, fix bugs, advance with new features + styling polish.
+
+## Current Project Status / Assessment
+- Project is stable: marketing site (4 pages), 18-tab dashboard, client portal (with radar + forecast), 15+ feature modules, all lint-clean.
+- QA via agent-browser: all 18 tabs render without errors, command palette works, portal works, mobile has no overflow.
+- No bugs found — focused on search enhancement + shortcuts overlay + styling polish.
+
+## Current Goals / Completed Modifications / Verification Results
+
+Work Log:
+- Enhanced **Global Search Dialog** (`search-dialog.tsx`):
+  - When query is empty, now shows a "Quick Actions" section with 6 actions (Launch Dashboard, Onboard a Client, Compare Companies, Industries, Capabilities, Home) — each with icon + hint.
+  - Shows "Recent / Saved" section listing up to 5 saved views (from the saved-views store) when available.
+  - Added a footer with keyboard hints (↵ open, esc close) and "Powered by RankForge".
+  - Existing company + keyword search results still work as before.
+- Built **Keyboard Shortcuts Overlay** (`shortcuts-overlay.tsx`):
+  - Press `?` (or Shift+/) anytime to toggle a dialog showing all keyboard shortcuts.
+  - 4 groups: Global (⌘K, ?, esc), Navigation (G+D/H/I/C), Actions (N, C, B, T), Dashboard (↑↓, ↵, 1-9).
+  - Each shortcut shows description + kbd combo; "Press ? anytime to toggle" footer.
+  - Ignores keypress when typing in inputs.
+  - Added to both marketing and app views.
+- Added **styling polish** to `globals.css`:
+  - `rf-border-animated` — continuously animating gradient border (spins every 4s).
+  - `rf-conic-accent` — conic gradient accent for hero badges.
+  - Improved dark mode card contrast (`oklch(0.22 0.018 165)` background, subtle border).
+  - `rf-inner-glow` — soft inset top highlight for active elements.
+  - `rf-stagger-fade` — left-to-right stagger fade for list items.
+  - `rf-link-underline` — gradient underline that grows on hover.
+
+Verification:
+- Search dialog: opens with Quick Actions (Launch Dashboard, Onboard, Compare, Industries, Capabilities, Home) + Recent/Saved sections.
+- Shortcuts overlay: `?` opens it, shows all 4 groups with shortcuts; ESC closes.
+- All 18 tabs render without errors.
+- Mobile: no horizontal overflow. Lint: clean (0 errors). No console/page errors.
+
+Stage Summary:
+- **2 new features**: Enhanced Search Dialog (quick actions + recents), Keyboard Shortcuts Overlay (? key).
+- **Styling**: animated gradient borders, conic accents, improved dark mode, stagger fades, link underlines.
+- **Lint**: clean. **Verification**: all tested via agent-browser.
+
+## Unresolved Issues / Risks + Next-phase Recommendations
+- Implement the actual G+D/G+H/G+I/G+C and N/C/B/T shortcut handlers (overlay documents them but they're not yet wired).
+- Real NextAuth authentication (currently mock sign-in).
+- d3-force for larger internal link graphs.
+- Real geo SVG for rank map.
+- Scheduled email digests for alerts + forecast summaries.
+- SEO Health Score gauge with animated history sparkline in overview cards (deferred).

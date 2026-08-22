@@ -541,3 +541,74 @@
 .rf-icon-scale:hover {
   transform: scale(1.15);
 }
+
+/* ---------- Round 5 polish ---------- */
+
+/* Animated gradient border (continuous) */
+@keyframes rf-border-spin {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.rf-border-animated {
+  position: relative;
+  background: var(--card);
+}
+.rf-border-animated::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: linear-gradient(135deg, oklch(0.62 0.14 158), oklch(0.7 0.13 195), oklch(0.62 0.14 158));
+  background-size: 200% 200%;
+  animation: rf-border-spin 4s ease infinite;
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+  opacity: 0.5;
+}
+
+/* Conic gradient accent for hero badges */
+.rf-conic-accent {
+  background: conic-gradient(from 180deg, oklch(0.62 0.14 158), oklch(0.7 0.13 195), oklch(0.62 0.14 158));
+}
+
+/* Improved dark mode card contrast */
+.dark [data-slot="card"] {
+  background: oklch(0.22 0.018 165);
+  border-color: oklch(1 0 0 / 0.08);
+}
+
+/* Soft inner glow for active elements */
+.rf-inner-glow {
+  box-shadow: inset 0 1px 0 0 oklch(1 0 0 / 0.06);
+}
+
+/* Stagger fade for list items */
+@keyframes rf-stagger-fade {
+  from { opacity: 0; transform: translateX(-8px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.rf-stagger-fade {
+  animation: rf-stagger-fade 0.3s ease-out both;
+}
+
+/* Gradient underline on hover for links */
+.rf-link-underline {
+  position: relative;
+}
+.rf-link-underline::after {
+  content: "";
+  position: absolute;
+  bottom: -2px;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: linear-gradient(90deg, oklch(0.62 0.14 158), oklch(0.7 0.13 195));
+  transition: width 0.3s ease;
+}
+.rf-link-underline:hover::after {
+  width: 100%;
+}
