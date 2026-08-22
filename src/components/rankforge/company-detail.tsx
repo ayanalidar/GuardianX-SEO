@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { useNav } from "@/store/nav";
 import { useFetch, formatNumber, formatPercent } from "@/lib/seo/hooks";
 import { CompanyDetail as Detail } from "@/lib/seo/types";
@@ -43,6 +44,34 @@ import {
 export function CompanyDetail({ companyId }: { companyId: string }) {
   const { data, loading, error } = useFetch<Detail>(`/api/companies/${companyId}`);
   const backToOverview = useNav((s) => s.backToOverview);
+
+  const TAB_VALUES = [
+    "overview", "keywords", "backlinks", "competitors", "landscape",
+    "technical", "cwv", "serp", "gaps", "ai", "forecast", "timeline",
+    "heatmap", "linkgraph", "anchorcloud", "rankmap", "alerts", "briefs",
+    "cannibalization",
+  ];
+  const [activeTab, setActiveTab] = useState("overview");
+
+  // Number keys 1-9 switch to first 9 tabs
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      const target = e.target as HTMLElement;
+      const isTyping = target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable;
+      if (isTyping) return;
+      if (document.body.getAttribute("aria-hidden") === "true") return;
+      if (e.metaKey || e.ctrlKey || e.altKey) return;
+      if (e.key >= "1" && e.key <= "9") {
+        const idx = Number(e.key) - 1;
+        if (idx < TAB_VALUES.length) {
+          e.preventDefault();
+          setActiveTab(TAB_VALUES[idx]);
+        }
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
 
   if (loading) {
     return (
@@ -256,34 +285,43 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
       </div>
 
       {/* Tabs */}
-      <Tabs defaultValue="overview" className="space-y-4">
+      <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
         <TabsList className="w-full justify-start overflow-x-auto rf-scroll h-auto flex-wrap">
           <TabsTrigger value="overview" className="gap-1.5">
             <Activity className="h-3.5 w-3.5" /> Overview
+            <kbd className="hidden lg:inline-flex h-4 w-4 items-center justify-center rounded bg-muted-foreground/15 text-[9px] font-bold">1</kbd>
           </TabsTrigger>
           <TabsTrigger value="keywords" className="gap-1.5">
             <KeyRound className="h-3.5 w-3.5" /> Keywords
+            <kbd className="hidden lg:inline-flex h-4 w-4 items-center justify-center rounded bg-muted-foreground/15 text-[9px] font-bold">2</kbd>
           </TabsTrigger>
           <TabsTrigger value="backlinks" className="gap-1.5">
             <Link2 className="h-3.5 w-3.5" /> Backlinks
+            <kbd className="hidden lg:inline-flex h-4 w-4 items-center justify-center rounded bg-muted-foreground/15 text-[9px] font-bold">3</kbd>
           </TabsTrigger>
           <TabsTrigger value="competitors" className="gap-1.5">
             <Target className="h-3.5 w-3.5" /> Competitors
+            <kbd className="hidden lg:inline-flex h-4 w-4 items-center justify-center rounded bg-muted-foreground/15 text-[9px] font-bold">4</kbd>
           </TabsTrigger>
           <TabsTrigger value="landscape" className="gap-1.5">
             <Target className="h-3.5 w-3.5" /> Landscape
+            <kbd className="hidden lg:inline-flex h-4 w-4 items-center justify-center rounded bg-muted-foreground/15 text-[9px] font-bold">5</kbd>
           </TabsTrigger>
           <TabsTrigger value="technical" className="gap-1.5">
             <Shield className="h-3.5 w-3.5" /> Technical
+            <kbd className="hidden lg:inline-flex h-4 w-4 items-center justify-center rounded bg-muted-foreground/15 text-[9px] font-bold">6</kbd>
           </TabsTrigger>
           <TabsTrigger value="cwv" className="gap-1.5">
             <Zap className="h-3.5 w-3.5" /> Core Web Vitals
+            <kbd className="hidden lg:inline-flex h-4 w-4 items-center justify-center rounded bg-muted-foreground/15 text-[9px] font-bold">7</kbd>
           </TabsTrigger>
           <TabsTrigger value="serp" className="gap-1.5">
             <Layers className="h-3.5 w-3.5" /> SERP Features
+            <kbd className="hidden lg:inline-flex h-4 w-4 items-center justify-center rounded bg-muted-foreground/15 text-[9px] font-bold">8</kbd>
           </TabsTrigger>
           <TabsTrigger value="gaps" className="gap-1.5">
             <Lightbulb className="h-3.5 w-3.5" /> Content Gaps
+            <kbd className="hidden lg:inline-flex h-4 w-4 items-center justify-center rounded bg-muted-foreground/15 text-[9px] font-bold">9</kbd>
           </TabsTrigger>
           <TabsTrigger value="ai" className="gap-1.5">
             <Bot className="h-3.5 w-3.5" /> AI Insights

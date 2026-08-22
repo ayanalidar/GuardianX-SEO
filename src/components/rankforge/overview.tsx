@@ -13,6 +13,18 @@ import { motion } from "framer-motion";
 import { AnimatedCounter, CinematicBackground, Reveal, StaggerContainer, StaggerItem } from "./motion";
 import { ActivityFeed } from "./features/activity-feed";
 import { useNav } from "@/store/nav";
+import { useState } from "react";
+import { ArrowUpDown, TrendingUp, Gauge, AlertTriangle, Trophy } from "lucide-react";
+
+type SortKey = "traffic" | "score" | "da" | "issues" | "name";
+
+const SORT_OPTIONS: Array<{ key: SortKey; label: string; icon: typeof TrendingUp }> = [
+  { key: "traffic", label: "Traffic", icon: TrendingUp },
+  { key: "score", label: "SEO Score", icon: Trophy },
+  { key: "da", label: "Domain Auth", icon: Gauge },
+  { key: "issues", label: "Issues", icon: AlertTriangle },
+  { key: "name", label: "Name", icon: ArrowUpDown },
+];
 
 export function Overview({
   domains,
@@ -29,6 +41,29 @@ export function Overview({
       : domains.filter((d) => d.slug === activeSlug);
 
   const setOnboarding = useNav((s) => s.setOnboarding);
+  const [sortKey, setSortKey] = useState<SortKey>("traffic");
+
+  const sortCompanies = (companies: DomainWithCompanies["companies"]) => {
+    const sorted = [...companies];
+    switch (sortKey) {
+      case "traffic":
+        sorted.sort((a, b) => (b.latest?.organicTraffic ?? 0) - (a.latest?.organicTraffic ?? 0));
+        break;
+      case "score":
+        sorted.sort((a, b) => (b.latest?.visibilityScore ?? 0) - (a.latest?.visibilityScore ?? 0));
+        break;
+      case "da":
+        sorted.sort((a, b) => (b.latest?.domainAuthority ?? 0) - (a.latest?.domainAuthority ?? 0));
+        break;
+      case "issues":
+        sorted.sort((a, b) => a.issueCount - b.issueCount);
+        break;
+      case "name":
+        sorted.sort((a, b) => a.name.localeCompare(b.name));
+        break;
+    }
+    return sorted;
+  };
 
   if (loading) {
     return (
@@ -215,11 +250,35 @@ export function Overview({
                       <div className="font-bold tabular-nums">{domainDA.toFixed(1)}</div>
                     </div>
                   </div>
-                ) : null}
+                ) : (
+                  /* Sort selector (only when a specific domain is active) */
+                  <div className="flex items-center gap-1.5">
+                    <span className="text-xs text-muted-foreground font-medium hidden sm:inline">Sort by:</span>
+                    <div className="flex gap-1">
+                      {SORT_OPTIONS.map((opt) => {
+                        const SIcon = opt.icon;
+                        return (
+                          <button
+                            key={opt.key}
+                            onClick={() => setSortKey(opt.key)}
+                            className={`inline-flex items-center gap-1 rounded-md px-2 py-1 text-xs font-medium transition-colors ${
+                              sortKey === opt.key
+                                ? "bg-primary text-primary-foreground"
+                                : "bg-muted text-muted-foreground hover:bg-muted/70"
+                            }`}
+                          >
+                            <SIcon className="h-3 w-3" />
+                            <span className="hidden sm:inline">{opt.label}</span>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
               </div>
             </Reveal>
             <StaggerContainer className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4" stagger={0.06}>
-              {d.companies.map((c) => (
+              {sortCompanies(d.companies).map((c) => (
                 <StaggerItem key={c.id}>
                   <CompanyCard company={c} domain={d} />
                 </StaggerItem>

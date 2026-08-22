@@ -529,3 +529,46 @@ Stage Summary:
 - Real geo SVG for rank map.
 - Scheduled email digests for alerts + forecast summaries.
 - Tab switching via number keys (1-9) in company view (documented but not yet wired).
+
+---
+Task ID: 19 (webDevReview round 8 — number-key tab switching, dashboard sort, polish)
+Agent: main (Z.ai Code) — cron-triggered review
+Task: Assess project status, perform QA, fix bugs, advance with new features.
+
+## Current Project Status / Assessment
+- Project is stable: marketing site (4 pages), 18-tab dashboard, client portal (with radar + forecast), 18+ feature modules, all lint-clean.
+- QA via agent-browser: all 18 tabs render without errors, activity feed works, keyboard shortcuts work, mobile has no overflow.
+- No bugs found — focused on number-key tab switching + dashboard sort selector.
+
+## Current Goals / Completed Modifications / Verification Results
+
+Work Log:
+- Built **number-key tab switching** in company detail view:
+  - Converted the `Tabs` component from uncontrolled (`defaultValue`) to controlled (`value`/`onValueChange`) with `activeTab` state.
+  - Added a `useEffect` keyboard handler: keys `1`-`9` switch to the corresponding tab (1=Overview, 2=Keywords, ... 9=Content Gaps).
+  - Ignores keypresses when typing in inputs or when a dialog is open; ignores modifier combos.
+  - Added visible `<kbd>` number badges (1-9) to the first 9 tab triggers (visible on lg+ screens) so users discover the shortcuts.
+- Built **dashboard sort selector** in overview:
+  - When a specific domain is filtered, shows a "Sort by" selector with 5 options: Traffic, SEO Score, Domain Auth, Issues, Name.
+  - Each option is a pill button with an icon; the active sort is highlighted with primary color.
+  - Sorts the company cards within each domain section accordingly.
+  - Verified: sorting by Issues reorders companies (NovaKart 7 → RetailHub 7 → TrendCart 9 → ShopMax 10 → BuyVibe 11).
+
+Verification:
+- Number keys: pressing `2` switches to Keywords tab ✓; pressing `5` switches to Landscape tab ✓ (verified via `[selected]` state).
+- Sort selector: appears on domain-filtered view; clicking "Issues" reorders companies by issue count ✓.
+- Number badges (1-9) visible on tabs.
+- All 18 tabs render without errors.
+- Mobile: no horizontal overflow. Lint: clean (0 errors). No console/page errors.
+
+Stage Summary:
+- **2 new features**: Number-key tab switching (1-9) with visible kbd badges, Dashboard sort selector (5 sort keys).
+- **Lint**: clean. **Verification**: all tested via agent-browser.
+
+## Unresolved Issues / Risks + Next-phase Recommendations
+- SEO Health Score sparkline in overview company cards (deferred again).
+- Real NextAuth authentication (currently mock sign-in).
+- d3-force for larger internal link graphs.
+- Real geo SVG for rank map.
+- Scheduled email digests for alerts + forecast summaries.
+- Animated chart entrances + improved dark mode (styling polish deferred).
