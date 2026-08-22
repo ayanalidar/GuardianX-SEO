@@ -46,6 +46,8 @@ model Company {
   issues      TechnicalIssue[]
   contentGaps ContentGap[]
   insights    SeoInsight[]
+  webVitals   CoreWebVital[]
+  serpFeatures SerpFeature[]
 
   @@unique([domainId, slug])
 }
@@ -170,6 +172,43 @@ model SeoInsight {
   content   String
   priority  String   // high | medium | low
   createdAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+// Core Web Vitals — per-URL performance measurements (LCP, FID, CLS, INP, TTFB, FCP)
+model CoreWebVital {
+  id        String   @id @default(cuid())
+  companyId String
+  url       String
+  device    String   // mobile | desktop
+  lcp       Float    // Largest Contentful Paint (seconds)
+  fid       Float    // First Input Delay (ms)
+  cls       Float    // Cumulative Layout Shift (unitless)
+  inp       Float    // Interaction to Next Paint (ms)
+  ttfb      Float    // Time to First Byte (ms)
+  fcp       Float    // First Contentful Paint (seconds)
+  score     Float    // 0..100 overall CWV score
+  status    String   // good | needs-improvement | poor
+  updatedAt DateTime @default(now())
+
+  company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@index([companyId])
+}
+
+// SERP feature tracking — which rich results / features the company captures
+model SerpFeature {
+  id        String   @id @default(cuid())
+  companyId String
+  type      String   // featured-snippet | sitelinks | reviews | faq | video | image-pack | local-pack | top-stories | people-also-ask
+  keyword   String
+  url       String
+  captured  Boolean  @default(true)
+  competitorOwned Boolean @default(false) // true if a competitor owns this feature
+  updatedAt DateTime @default(now())
 
   company Company @relation(fields: [companyId], references: [id], onDelete: Cascade)
 

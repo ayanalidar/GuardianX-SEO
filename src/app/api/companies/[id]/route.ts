@@ -25,6 +25,8 @@ export async function GET(
     issues,
     contentGaps,
     insights,
+    webVitals,
+    serpFeatures,
     latest,
     first,
   ] = await Promise.all([
@@ -55,6 +57,14 @@ export async function GET(
     db.seoInsight.findMany({
       where: { companyId: id },
       orderBy: { createdAt: "desc" },
+    }),
+    db.coreWebVital.findMany({
+      where: { companyId: id },
+      orderBy: [{ device: "asc" }, { score: "asc" }],
+    }),
+    db.serpFeature.findMany({
+      where: { companyId: id },
+      orderBy: [{ captured: "desc" }, { updatedAt: "desc" }],
     }),
     db.seoMetric.findFirst({
       where: { companyId: id },
@@ -97,6 +107,43 @@ export async function GET(
     resolved: issues.filter((i) => i.status === "resolved").length,
   };
 
+  // Core Web Vitals summary
+  const mobileWv = webVitals.filter((w) => w.device === "mobile");
+  const desktopWv = webVitals.filter((w) => w.device === "desktop");
+  const avgScore =
+    webVitals.length > 0
+      ? Math.round(
+          (webVitals.reduce((s, w) => s + w.score, 0) / webVitals.length) * 10
+        ) / 10
+      : 0;
+  const cwvSummary = {
+    avgScore,
+    good: webVitals.filter((w) => w.status === "good").length,
+    needsImprovement: webVitals.filter((w) => w.status === "needs-improvement").length,
+    poor: webVitals.filter((w) => w.status === "poor").length,
+    mobileScore:
+      mobileWv.length > 0
+        ? Math.round((mobileWv.reduce((s, w) => s + w.score, 0) / mobileWv.length) * 10) / 10
+        : 0,
+    desktopScore:
+      desktopWv.length > 0
+        ? Math.round((desktopWv.reduce((s, w) => s + w.score, 0) / desktopWv.length) * 10) / 10
+        : 0,
+  };
+
+  // SERP feature summary
+  const byType: Record<string, { captured: number; competitorOwned: number }> = {};
+  for (const f of serpFeatures) {
+    if (!byType[f.type]) byType[f.type] = { captured: 0, competitorOwned: 0 };
+    if (f.captured) byType[f.type].captured++;
+    if (f.competitorOwned) byType[f.type].competitorOwned++;
+  }
+  const serpSummary = {
+    captured: serpFeatures.filter((f) => f.captured).length,
+    competitorOwned: serpFeatures.filter((f) => f.competitorOwned).length,
+    byType,
+  };
+
   const seoScore = computeSeoScore({
     latest,
     issues,
@@ -114,11 +161,15 @@ export async function GET(
     issues,
     contentGaps,
     insights,
+    webVitals,
+    serpFeatures,
     latest,
     seoScore,
     trafficDelta: Math.round(trafficDelta * 10) / 10,
     positionBuckets: buckets,
     backlinkStats: { dofollow, nofollow, newLinks, lostLinks, activeLinks, total: backlinks.length },
     issueStats,
+    cwvSummary,
+    serpSummary,
   });
 }

@@ -152,3 +152,113 @@
 .rf-grad-emerald {
   background: linear-gradient(135deg, oklch(0.62 0.14 158), oklch(0.7 0.13 195));
 }
+
+/* ---------- Advanced animations & polish ---------- */
+
+/* Card entrance stagger */
+@keyframes rf-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.rf-card-enter {
+  animation: rf-fade-up 0.4s ease-out both;
+}
+
+/* Shimmer for skeletons */
+@keyframes rf-shimmer {
+  0% { background-position: -1000px 0; }
+  100% { background-position: 1000px 0; }
+}
+.rf-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    oklch(0.92 0.01 160) 50%,
+    var(--muted) 100%
+  );
+  background-size: 1000px 100%;
+  animation: rf-shimmer 2s infinite linear;
+}
+.dark .rf-shimmer {
+  background: linear-gradient(
+    90deg,
+    var(--muted) 0%,
+    oklch(0.34 0.02 165) 50%,
+    var(--muted) 100%
+  );
+  background-size: 1000px 100%;
+}
+
+/* Pulsing live dot */
+@keyframes rf-pulse-dot {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.5; transform: scale(0.85); }
+}
+.rf-pulse-dot {
+  animation: rf-pulse-dot 1.8s ease-in-out infinite;
+}
+
+/* Gradient text shimmer for hero headline */
+@keyframes rf-gradient-pan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+.rf-gradient-text {
+  background: linear-gradient(90deg, oklch(0.55 0.16 158), oklch(0.6 0.15 180), oklch(0.55 0.16 158));
+  background-size: 200% auto;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+  animation: rf-gradient-pan 6s ease infinite;
+}
+
+/* Tab indicator slide */
+.rf-tab-active {
+  position: relative;
+}
+.rf-tab-active::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: 0 0 0 1px oklch(0.62 0.14 158 / 0.3);
+  pointer-events: none;
+}
+
+/* Smooth bar grow for charts */
+.recharts-bar-rectangle {
+  transition: opacity 0.2s ease;
+}
+.recharts-bar-rectangle:hover {
+  opacity: 0.85;
+}
+
+/* Number ticker emphasis */
+.rf-num-emphasis {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}
+
+/* Glassmorphism for floating bars */
+.rf-glass {
+  background: oklch(1 0 0 / 0.85);
+  backdrop-filter: blur(16px) saturate(180%);
+}
+.dark .rf-glass {
+  background: oklch(0.2 0.02 165 / 0.85);
+}
+
+/* Hide scrollbar but keep functionality */
+.rf-scroll-hidden::-webkit-scrollbar {
+  display: none;
+}
+.rf-scroll-hidden {
+  scrollbar-width: none;
+}

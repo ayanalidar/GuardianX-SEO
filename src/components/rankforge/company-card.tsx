@@ -8,7 +8,7 @@ import { formatNumber, formatPercent } from "@/lib/seo/hooks";
 import { scoreGrade } from "@/lib/seo/score";
 import {
   Globe, MapPin, Users, Calendar, TrendingUp, TrendingDown,
-  Link2, KeyRound, AlertTriangle, ArrowRight,
+  Link2, KeyRound, AlertTriangle, ArrowRight, Check, GitCompare,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -20,30 +20,55 @@ export function CompanyCard({
   domain: DomainWithCompanies;
 }) {
   const openCompany = useNav((s) => s.openCompany);
+  const compareMode = useNav((s) => s.compareMode);
+  const compareIds = useNav((s) => s.compareIds);
+  const toggleCompareId = useNav((s) => s.toggleCompareId);
 
   const latest = company.latest;
   const score = latest ? Math.round(latest.visibilityScore) : 0;
   const grade = scoreGrade(score);
   const trafficUp = company.trafficDelta >= 0;
+  const isSelected = compareIds.includes(company.id);
+
+  const handleClick = () => {
+    if (compareMode) {
+      toggleCompareId(company.id);
+    } else {
+      openCompany(company.id, company.slug, domain.slug);
+    }
+  };
 
   return (
     <Card
       role="button"
       tabIndex={0}
-      onClick={() => openCompany(company.id, company.slug, domain.slug)}
+      onClick={handleClick}
       onKeyDown={(e) => {
         if (e.key === "Enter" || e.key === " ") {
           e.preventDefault();
-          openCompany(company.id, company.slug, domain.slug);
+          handleClick();
         }
       }}
-      className="group relative p-0 overflow-hidden cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+      className={cn(
+        "group relative p-0 overflow-hidden cursor-pointer hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+        compareMode && isSelected && "ring-2 ring-emerald-500/60 shadow-lg"
+      )}
     >
       {/* accent strip */}
       <div
         className="h-1.5 w-full"
         style={{ backgroundColor: domain.accent }}
       />
+      {compareMode && isSelected && (
+        <div className="absolute top-3 right-3 z-10 flex h-7 w-7 items-center justify-center rounded-full bg-emerald-500 text-white shadow-lg">
+          <Check className="h-4 w-4" />
+        </div>
+      )}
+      {compareMode && !isSelected && (
+        <div className="absolute top-3 right-3 z-10 flex h-7 w-7 items-center justify-center rounded-full border-2 border-dashed border-muted-foreground/40 text-muted-foreground/60">
+          <GitCompare className="h-3.5 w-3.5" />
+        </div>
+      )}
       <div className="p-5 space-y-4">
         {/* header */}
         <div className="flex items-start justify-between gap-3">

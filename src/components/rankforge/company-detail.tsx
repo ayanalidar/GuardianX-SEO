@@ -17,6 +17,7 @@ import {
 import {
   KeywordTable, BacklinksPanel, CompetitorsPanel,
   TechnicalIssuesPanel, ContentGapsPanel, AiInsightsPanel,
+  CoreWebVitalsPanel, SerpFeaturesPanel,
 } from "./panels";
 import { DomainIcon } from "./icons";
 import { scoreGrade } from "@/lib/seo/score";
@@ -24,6 +25,7 @@ import {
   ArrowLeft, Globe, MapPin, Users, Calendar, Building2,
   Activity, KeyRound, Link2, Gauge, Eye, TrendingUp,
   Search, Target, Shield, Lightbulb, Bot, ChevronRight,
+  Zap, Layers,
 } from "lucide-react";
 
 export function CompanyDetail({ companyId }: { companyId: string }) {
@@ -240,6 +242,12 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
           <TabsTrigger value="technical" className="gap-1.5">
             <Shield className="h-3.5 w-3.5" /> Technical
           </TabsTrigger>
+          <TabsTrigger value="cwv" className="gap-1.5">
+            <Zap className="h-3.5 w-3.5" /> Core Web Vitals
+          </TabsTrigger>
+          <TabsTrigger value="serp" className="gap-1.5">
+            <Layers className="h-3.5 w-3.5" /> SERP Features
+          </TabsTrigger>
           <TabsTrigger value="gaps" className="gap-1.5">
             <Lightbulb className="h-3.5 w-3.5" /> Content Gaps
           </TabsTrigger>
@@ -306,7 +314,7 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
         </TabsContent>
 
         <TabsContent value="keywords">
-          <KeywordTable keywords={data.keywords} />
+          <KeywordTable keywords={data.keywords} companyId={company.id} />
         </TabsContent>
 
         <TabsContent value="backlinks">
@@ -319,6 +327,14 @@ export function CompanyDetail({ companyId }: { companyId: string }) {
 
         <TabsContent value="technical">
           <TechnicalIssuesPanel issues={data.issues} stats={data.issueStats} />
+        </TabsContent>
+
+        <TabsContent value="cwv">
+          <CoreWebVitalsPanel detail={data} />
+        </TabsContent>
+
+        <TabsContent value="serp">
+          <SerpFeaturesPanel detail={data} />
         </TabsContent>
 
         <TabsContent value="gaps">

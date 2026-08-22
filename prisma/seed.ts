@@ -147,6 +147,8 @@ function generateTrend(base: number, days: number, volatility: number, bias: num
 
 async function main() {
   console.log("🧹 Cleaning existing data...");
+  await db.serpFeature.deleteMany();
+  await db.coreWebVital.deleteMany();
   await db.seoInsight.deleteMany();
   await db.contentGap.deleteMany();
   await db.technicalIssue.deleteMany();
@@ -327,6 +329,70 @@ async function main() {
           },
         });
       }
+
+      // ---- Core Web Vitals: ~8 URLs (mobile + desktop) ----
+      const cwvUrls = [
+        "/", "/products", "/blog", "/checkout", "/account",
+        "/search", "/category/featured", "/about",
+      ];
+      const cwvBias = trendingUp ? 1 : -1; // trending up = better CWV
+      for (let i = 0; i < cwvUrls.length; i++) {
+        for (const device of ["mobile", "desktop"]) {
+          const isMobile = device === "mobile";
+          const lcp = Math.max(0.6, rand(1.2, 3.8) + (isMobile ? 0.8 : 0) - cwvBias * 0.3);
+          const fid = Math.max(10, rand(20, 280) + (isMobile ? 60 : 0) - cwvBias * 30);
+          const cls = Math.max(0.01, rand(0.02, 0.22) - cwvBias * 0.03);
+          const inp = Math.max(40, rand(80, 480) + (isMobile ? 120 : 0) - cwvBias * 60);
+          const ttfb = Math.max(80, rand(150, 880) + (isMobile ? 100 : 0) - cwvBias * 80);
+          const fcp = Math.max(0.5, rand(0.9, 3.2) + (isMobile ? 0.6 : 0) - cwvBias * 0.25);
+
+          // CWV score: weighted blend (0-100)
+          const lcpScore = Math.max(0, 100 - Math.max(0, lcp - 2.5) * 40);
+          const fidScore = Math.max(0, 100 - Math.max(0, fid - 100) / 3);
+          const clsScore = Math.max(0, 100 - cls * 400);
+          const inpScore = Math.max(0, 100 - Math.max(0, inp - 200) / 3);
+          const score = Math.round((lcpScore * 0.3 + fidScore * 0.15 + clsScore * 0.2 + inpScore * 0.2 + Math.max(0, 100 - (ttfb - 200) / 8) * 0.15));
+          const status = score >= 75 ? "good" : score >= 50 ? "needs-improvement" : "poor";
+
+          await db.coreWebVital.create({
+            data: {
+              companyId: company.id,
+              url: `${c.website}${cwvUrls[i]}`,
+              device,
+              lcp: Math.round(lcp * 100) / 100,
+              fid: Math.round(fid),
+              cls: Math.round(cls * 1000) / 1000,
+              inp: Math.round(inp),
+              ttfb: Math.round(ttfb),
+              fcp: Math.round(fcp * 100) / 100,
+              score,
+              status,
+            },
+          });
+        }
+      }
+
+      // ---- SERP features: ~10 captured + a few competitor-owned ----
+      const SERP_TYPES = [
+        "featured-snippet", "sitelinks", "reviews", "faq",
+        "video", "image-pack", "local-pack", "top-stories", "people-also-ask",
+      ];
+      const serpCount = randInt(8, 14);
+      for (let i = 0; i < serpCount; i++) {
+        const kw = keywordPool[randInt(0, keywordPool.length - 1)];
+        const competitorOwned = Math.random() > 0.75;
+        await db.serpFeature.create({
+          data: {
+            companyId: company.id,
+            type: pick(SERP_TYPES),
+            keyword: kw,
+            url: `https://${c.website}/${kw.replace(/\s+/g, "-")}`,
+            captured: !competitorOwned,
+            competitorOwned,
+            updatedAt: new Date(Date.now() - randInt(1, 20) * 86400000),
+          },
+        });
+      }
     }
   }
 
@@ -340,6 +406,8 @@ async function main() {
     competitors: await db.competitor.count(),
     issues: await db.technicalIssue.count(),
     gaps: await db.contentGap.count(),
+    webVitals: await db.coreWebVital.count(),
+    serpFeatures: await db.serpFeature.count(),
   };
   console.log(counts);
 }

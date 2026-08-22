@@ -122,6 +122,33 @@ export type SeoInsight = {
   createdAt: string;
 };
 
+export type CoreWebVital = {
+  id: string;
+  companyId: string;
+  url: string;
+  device: string; // mobile | desktop
+  lcp: number;
+  fid: number;
+  cls: number;
+  inp: number;
+  ttfb: number;
+  fcp: number;
+  score: number;
+  status: string; // good | needs-improvement | poor
+  updatedAt: string;
+};
+
+export type SerpFeature = {
+  id: string;
+  companyId: string;
+  type: string;
+  keyword: string;
+  url: string;
+  captured: boolean;
+  competitorOwned: boolean;
+  updatedAt: string;
+};
+
 export type CompanyDetail = {
   company: CompanySummary & { domainId: string; createdAt: string };
   domain: Domain;
@@ -132,6 +159,8 @@ export type CompanyDetail = {
   issues: TechnicalIssue[];
   contentGaps: ContentGap[];
   insights: SeoInsight[];
+  webVitals: CoreWebVital[];
+  serpFeatures: SerpFeature[];
   latest: SeoMetric | null;
   seoScore: {
     total: number;
@@ -152,5 +181,18 @@ export type CompanyDetail = {
     warning: number;
     info: number;
     resolved: number;
+  };
+  cwvSummary: {
+    avgScore: number;
+    good: number;
+    needsImprovement: number;
+    poor: number;
+    mobileScore: number;
+    desktopScore: number;
+  };
+  serpSummary: {
+    captured: number;
+    competitorOwned: number;
+    byType: Record<string, { captured: number; competitorOwned: number }>;
   };
 };

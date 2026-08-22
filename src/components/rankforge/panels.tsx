@@ -10,20 +10,24 @@ import {
 import {
   Tooltip, TooltipContent, TooltipProvider, TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { KeywordTrendSparkline, BacklinkTypeChart } from "./charts";
+import { KeywordTrendSparkline, BacklinkTypeChart, CwvGauge } from "./charts";
 import {
   CompanyDetail, Keyword, Backlink, Competitor,
-  TechnicalIssue, ContentGap, SeoInsight,
+  TechnicalIssue, ContentGap, SeoInsight, CoreWebVital, SerpFeature,
 } from "@/lib/seo/types";
 import { formatNumber, formatMoney } from "@/lib/seo/hooks";
 import {
   ArrowUpDown, ExternalLink, ArrowUp, ArrowDown, Minus,
   Link2, Shield, AlertTriangle, AlertCircle, Info,
   Lightbulb, Sparkles, Loader2, Bot, Target, TrendingUp,
+  Gauge, Smartphone, Monitor, Zap, Clock, Layout, MousePointerClick,
+  Search, FileDown, Trash2, Star, Video, Image, MapPin,
+  Newspaper, HelpCircle, Link as LinkIcon, Layers,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useState } from "react";
 import { useFetch } from "@/lib/seo/hooks";
+import { useToast } from "@/hooks/use-toast";
 
 // ---------- Keyword Table ----------
 const intentColors: Record<string, string> = {
@@ -33,14 +37,27 @@ const intentColors: Record<string, string> = {
   navigational: "bg-amber-500/10 text-amber-600 dark:text-amber-400",
 };
 
-export function KeywordTable({ keywords }: { keywords: Keyword[] }) {
+export function KeywordTable({ keywords, companyId }: { keywords: Keyword[]; companyId: string }) {
+  const { toast } = useToast();
+  const exportCsv = () => {
+    window.open(`/api/export?companyId=${companyId}&type=keywords`, "_blank");
+    toast({ title: "Export started", description: "Downloading keywords CSV…" });
+  };
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Keyword Rank Tracking</CardTitle>
-        <CardDescription>
-          {keywords.length} tracked keywords · live position with 14-day trend
-        </CardDescription>
+        <div className="flex items-start justify-between gap-3 flex-wrap">
+          <div>
+            <CardTitle>Keyword Rank Tracking</CardTitle>
+            <CardDescription>
+              {keywords.length} tracked keywords · live position with 14-day trend
+            </CardDescription>
+          </div>
+          <Button variant="outline" size="sm" onClick={exportCsv} className="gap-1.5">
+            <FileDown className="h-3.5 w-3.5" />
+            Export CSV
+          </Button>
+        </div>
       </CardHeader>
       <CardContent className="p-0">
         <div className="max-h-[520px] overflow-y-auto rf-scroll">
@@ -154,10 +171,15 @@ function DifficultyBar({ value }: { value: number }) {
 
 // ---------- Backlinks Panel ----------
 export function BacklinksPanel({ detail }: { detail: CompanyDetail }) {
-  const { backlinks, backlinkStats } = detail;
+  const { backlinks, backlinkStats, company } = detail;
+  const { toast } = useToast();
   const dofollowPct = backlinkStats.total > 0
     ? Math.round((backlinkStats.dofollow / backlinkStats.total) * 100)
     : 0;
+  const exportCsv = () => {
+    window.open(`/api/export?companyId=${company.id}&type=backlinks`, "_blank");
+    toast({ title: "Export started", description: "Downloading backlinks CSV…" });
+  };
   return (
     <div className="grid gap-4 lg:grid-cols-3">
       <Card className="lg:col-span-1">
@@ -195,8 +217,16 @@ export function BacklinksPanel({ detail }: { detail: CompanyDetail }) {
 
       <Card className="lg:col-span-2">
         <CardHeader>
-          <CardTitle>Top Referring Domains</CardTitle>
-          <CardDescription>High-authority backlinks sorted by DA</CardDescription>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <CardTitle>Top Referring Domains</CardTitle>
+              <CardDescription>High-authority backlinks sorted by DA</CardDescription>
+            </div>
+            <Button variant="outline" size="sm" onClick={exportCsv} className="gap-1.5">
+              <FileDown className="h-3.5 w-3.5" />
+              Export CSV
+            </Button>
+          </div>
         </CardHeader>
         <CardContent className="p-0">
           <div className="max-h-[440px] overflow-y-auto rf-scroll">
@@ -491,6 +521,7 @@ export function AiInsightsPanel({ companyId }: { companyId: string }) {
   const [generating, setGenerating] = useState(false);
   const [genError, setGenError] = useState<string | null>(null);
   const [localInsights, setLocalInsights] = useState<SeoInsight[] | null>(null);
+  const { toast } = useToast();
 
   const insights = localInsights ?? data?.insights ?? [];
 
@@ -504,10 +535,34 @@ export function AiInsightsPanel({ companyId }: { companyId: string }) {
       if (!r.ok) throw new Error("Generation failed");
       const j = await r.json();
       setLocalInsights(j.insights);
+      toast({
+        title: "Insights generated",
+        description: `${j.insights.length} AI recommendations ready.`,
+      });
     } catch (e) {
       setGenError(e instanceof Error ? e.message : "Failed");
     } finally {
       setGenerating(false);
+    }
+  };
+
+  const clearInsights = async () => {
+    try {
+      const r = await fetch(`/api/companies/${companyId}/insights/clear`, {
+        method: "DELETE",
+      });
+      if (!r.ok) throw new Error("Clear failed");
+      setLocalInsights([]);
+      toast({
+        title: "Insights cleared",
+        description: "All AI insights removed for this company.",
+      });
+    } catch (e) {
+      toast({
+        title: "Clear failed",
+        description: e instanceof Error ? e.message : "Unknown error",
+        variant: "destructive",
+      });
     }
   };
 
@@ -541,19 +596,38 @@ export function AiInsightsPanel({ companyId }: { companyId: string }) {
                   Get data-driven recommendations generated by RankForge AI
                 </CardDescription>
               </div>
-              <Button onClick={generate} disabled={generating} className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:opacity-90">
-                {generating ? (
-                  <>
-                    <Loader2 className="h-4 w-4 mr-2 animate-spin" />
-                    Analyzing…
-                  </>
-                ) : (
-                  <>
-                    <Sparkles className="h-4 w-4 mr-2" />
-                    Generate Insights
-                  </>
+              <div className="flex items-center gap-2">
+                {insights.length > 0 && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={clearInsights}
+                    disabled={generating}
+                    className="gap-1.5"
+                  >
+                    <Trash2 className="h-3.5 w-3.5" />
+                    Clear
+                  </Button>
                 )}
-              </Button>
+                <Button onClick={generate} disabled={generating} className="bg-gradient-to-r from-emerald-500 to-teal-600 text-white hover:opacity-90">
+                  {generating ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      Analyzing…
+                    </>
+                  ) : insights.length > 0 ? (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Regenerate
+                    </>
+                  ) : (
+                    <>
+                      <Sparkles className="h-4 w-4 mr-2" />
+                      Generate Insights
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -610,6 +684,355 @@ export function AiInsightsPanel({ companyId }: { companyId: string }) {
             )}
           </CardContent>
         </div>
+      </Card>
+    </div>
+  );
+}
+
+// ---------- Core Web Vitals Panel ----------
+const cwvMetricConfig: Record<
+  string,
+  { label: string; icon: typeof Gauge; unit: string; goodMax: number; needsMax: number }
+> = {
+  lcp: { label: "LCP", icon: Zap, unit: "s", goodMax: 2.5, needsMax: 4.0 },
+  fid: { label: "FID", icon: Clock, unit: "ms", goodMax: 100, needsMax: 300 },
+  cls: { label: "CLS", icon: Layout, unit: "", goodMax: 0.1, needsMax: 0.25 },
+  inp: { label: "INP", icon: MousePointerClick, unit: "ms", goodMax: 200, needsMax: 500 },
+  ttfb: { label: "TTFB", icon: Clock, unit: "ms", goodMax: 800, needsMax: 1800 },
+  fcp: { label: "FCP", icon: Zap, unit: "s", goodMax: 1.8, needsMax: 3.0 },
+};
+
+function cwvStatus(value: number, key: string): "good" | "needs-improvement" | "poor" {
+  const cfg = cwvMetricConfig[key];
+  if (!cfg) return "needs-improvement";
+  if (value <= cfg.goodMax) return "good";
+  if (value <= cfg.needsMax) return "needs-improvement";
+  return "poor";
+}
+
+const cwvStatusColor: Record<string, string> = {
+  good: "text-emerald-600 dark:text-emerald-400",
+  "needs-improvement": "text-amber-600 dark:text-amber-400",
+  poor: "text-rose-600 dark:text-rose-400",
+};
+const cwvStatusBg: Record<string, string> = {
+  good: "bg-emerald-500/10",
+  "needs-improvement": "bg-amber-500/10",
+  poor: "bg-rose-500/10",
+};
+
+export function CoreWebVitalsPanel({ detail }: { detail: CompanyDetail }) {
+  const { webVitals, cwvSummary } = detail;
+  const mobile = webVitals.filter((w) => w.device === "mobile");
+  const desktop = webVitals.filter((w) => w.device === "desktop");
+
+  return (
+    <div className="space-y-4">
+      {/* Summary cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <Card className="p-4">
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase text-muted-foreground font-medium">Avg CWV Score</span>
+            <Gauge className="h-4 w-4 text-primary" />
+          </div>
+          <div className="mt-1.5 text-2xl font-bold tabular-nums">{cwvSummary.avgScore}</div>
+        </Card>
+        <Card className="p-4 bg-emerald-500/5 border-emerald-500/20">
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase text-emerald-700 dark:text-emerald-400 font-medium">Good</span>
+            <span className="text-emerald-600 dark:text-emerald-400 text-lg font-bold">{cwvSummary.good}</span>
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">URLs passing</div>
+        </Card>
+        <Card className="p-4 bg-amber-500/5 border-amber-500/20">
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase text-amber-700 dark:text-amber-400 font-medium">Needs Work</span>
+            <span className="text-amber-600 dark:text-amber-400 text-lg font-bold">{cwvSummary.needsImprovement}</span>
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">URLs to improve</div>
+        </Card>
+        <Card className="p-4 bg-rose-500/5 border-rose-500/20">
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase text-rose-700 dark:text-rose-400 font-medium">Poor</span>
+            <span className="text-rose-600 dark:text-rose-400 text-lg font-bold">{cwvSummary.poor}</span>
+          </div>
+          <div className="text-xs text-muted-foreground mt-1">URLs failing</div>
+        </Card>
+      </div>
+
+      {/* Mobile vs Desktop scores */}
+      <div className="grid gap-4 md:grid-cols-2">
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Smartphone className="h-4 w-4 text-primary" />
+              Mobile Performance
+            </CardTitle>
+            <CardDescription>Avg score across {mobile.length} mobile URLs</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CwvGauge score={cwvSummary.mobileScore} />
+          </CardContent>
+        </Card>
+        <Card>
+          <CardHeader className="pb-3">
+            <CardTitle className="flex items-center gap-2 text-base">
+              <Monitor className="h-4 w-4 text-primary" />
+              Desktop Performance
+            </CardTitle>
+            <CardDescription>Avg score across {desktop.length} desktop URLs</CardDescription>
+          </CardHeader>
+          <CardContent>
+            <CwvGauge score={cwvSummary.desktopScore} />
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Detailed metrics table */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Gauge className="h-4 w-4 text-primary" />
+            Page Experience Metrics
+          </CardTitle>
+          <CardDescription>
+            Real-user Core Web Vitals measurements across {webVitals.length} URL/device combinations
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="max-h-[520px] overflow-y-auto rf-scroll">
+            <Table>
+              <TableHeader className="sticky top-0 bg-card">
+                <TableRow>
+                  <TableHead className="w-[60px]">Device</TableHead>
+                  <TableHead>URL</TableHead>
+                  <TableHead className="text-center">LCP</TableHead>
+                  <TableHead className="text-center">FID</TableHead>
+                  <TableHead className="text-center">CLS</TableHead>
+                  <TableHead className="text-center">INP</TableHead>
+                  <TableHead className="text-center">TTFB</TableHead>
+                  <TableHead className="text-center">FCP</TableHead>
+                  <TableHead className="text-center">Score</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {webVitals.map((w) => (
+                  <CwvRow key={w.id} w={w} />
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+}
+
+function CwvRow({ w }: { w: CoreWebVital }) {
+  const DeviceIcon = w.device === "mobile" ? Smartphone : Monitor;
+  return (
+    <TableRow className="hover:bg-muted/40">
+      <TableCell>
+        <span className={cn("inline-flex h-7 w-7 items-center justify-center rounded-md", w.device === "mobile" ? "bg-violet-500/10 text-violet-600 dark:text-violet-400" : "bg-cyan-500/10 text-cyan-600 dark:text-cyan-400")}>
+          <DeviceIcon className="h-3.5 w-3.5" />
+        </span>
+      </TableCell>
+      <TableCell className="font-mono text-xs truncate max-w-[200px]">{w.url}</TableCell>
+      <CwvCell value={w.lcp} metricKey="lcp" />
+      <CwvCell value={w.fid} metricKey="fid" />
+      <CwvCell value={w.cls} metricKey="cls" />
+      <CwvCell value={w.inp} metricKey="inp" />
+      <CwvCell value={w.ttfb} metricKey="ttfb" />
+      <CwvCell value={w.fcp} metricKey="fcp" />
+      <TableCell className="text-center">
+        <span className={cn("inline-flex min-w-10 justify-center rounded-md px-2 py-0.5 text-xs font-bold tabular-nums", cwvStatusBg[w.status], cwvStatusColor[w.status])}>
+          {w.score}
+        </span>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+function CwvCell({ value, metricKey }: { value: number; metricKey: string }) {
+  const status = cwvStatus(value, metricKey);
+  const cfg = cwvMetricConfig[metricKey];
+  return (
+    <TableCell className="text-center">
+      <TooltipProvider>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <span className={cn("inline-flex min-w-12 justify-center font-mono text-xs tabular-nums font-medium", cwvStatusColor[status])}>
+              {value}{cfg.unit}
+            </span>
+          </TooltipTrigger>
+          <TooltipContent side="top">
+            {cfg.label} · {status === "good" ? "Good" : status === "needs-improvement" ? "Needs improvement" : "Poor"}
+          </TooltipContent>
+        </Tooltip>
+      </TooltipProvider>
+    </TableCell>
+  );
+}
+
+// ---------- SERP Features Panel ----------
+const serpFeatureConfig: Record<string, { icon: typeof Star; label: string; color: string }> = {
+  "featured-snippet": { icon: Star, label: "Featured Snippet", color: "#f59e0b" },
+  sitelinks: { icon: LinkIcon, label: "Sitelinks", color: "#10b981" },
+  reviews: { icon: Star, label: "Reviews", color: "#f43f5e" },
+  faq: { icon: HelpCircle, label: "FAQ", color: "#8b5cf6" },
+  video: { icon: Video, label: "Video", color: "#ef4444" },
+  "image-pack": { icon: Image, label: "Image Pack", color: "#06b6d4" },
+  "local-pack": { icon: MapPin, label: "Local Pack", color: "#14b8a6" },
+  "top-stories": { icon: Newspaper, label: "Top Stories", color: "#0ea5e9" },
+  "people-also-ask": { icon: HelpCircle, label: "People Also Ask", color: "#84cc16" },
+};
+
+export function SerpFeaturesPanel({ detail }: { detail: CompanyDetail }) {
+  const { serpFeatures, serpSummary } = detail;
+  const captureRate = serpFeatures.length > 0
+    ? Math.round((serpSummary.captured / serpFeatures.length) * 100)
+    : 0;
+  const types = Object.keys(serpSummary.byType);
+
+  return (
+    <div className="space-y-4">
+      {/* Summary */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <Card className="p-5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase text-muted-foreground font-medium">SERP Features Captured</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+              <Layers className="h-4 w-4" />
+            </span>
+          </div>
+          <div className="mt-1.5 text-3xl font-bold tabular-nums">{serpSummary.captured}</div>
+          <div className="text-xs text-muted-foreground mt-1">of {serpFeatures.length} tracked opportunities</div>
+        </Card>
+        <Card className="p-5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase text-muted-foreground font-medium">Capture Rate</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-teal-500/10 text-teal-600 dark:text-teal-400">
+              <Target className="h-4 w-4" />
+            </span>
+          </div>
+          <div className="mt-1.5 text-3xl font-bold tabular-nums">{captureRate}%</div>
+          <div className="mt-2 h-2 rounded-full bg-muted overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-emerald-500 to-teal-500 transition-all" style={{ width: `${captureRate}%` }} />
+          </div>
+        </Card>
+        <Card className="p-5">
+          <div className="flex items-center justify-between">
+            <span className="text-xs uppercase text-muted-foreground font-medium">Lost to Competitors</span>
+            <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-rose-500/10 text-rose-600 dark:text-rose-400">
+              <AlertTriangle className="h-4 w-4" />
+            </span>
+          </div>
+          <div className="mt-1.5 text-3xl font-bold tabular-nums">{serpSummary.competitorOwned}</div>
+          <div className="text-xs text-muted-foreground mt-1">features owned by rivals</div>
+        </Card>
+      </div>
+
+      {/* Feature type breakdown */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Search className="h-4 w-4 text-primary" />
+            SERP Feature Breakdown
+          </CardTitle>
+          <CardDescription>Rich result types captured vs lost to competitors</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+            {types.map((t) => {
+              const cfg = serpFeatureConfig[t] ?? { icon: Layers, label: t, color: "#64748b" };
+              const Icon = cfg.icon;
+              const stat = serpSummary.byType[t];
+              const total = stat.captured + stat.competitorOwned;
+              const capturedPct = total > 0 ? Math.round((stat.captured / total) * 100) : 0;
+              return (
+                <div key={t} className="rounded-xl border p-4 hover:shadow-sm transition-shadow">
+                  <div className="flex items-center justify-between">
+                    <span className="flex items-center gap-2">
+                      <span className="flex h-8 w-8 items-center justify-center rounded-lg" style={{ backgroundColor: `${cfg.color}1a`, color: cfg.color }}>
+                        <Icon className="h-4 w-4" />
+                      </span>
+                      <span className="text-sm font-medium">{cfg.label}</span>
+                    </span>
+                    <span className="text-xs text-muted-foreground tabular-nums">{total}</span>
+                  </div>
+                  <div className="mt-3 flex items-center gap-2">
+                    <div className="flex-1 h-2 rounded-full bg-muted overflow-hidden flex">
+                      <div className="h-full" style={{ width: `${capturedPct}%`, backgroundColor: cfg.color }} />
+                      <div className="h-full bg-rose-400/50" style={{ width: `${100 - capturedPct}%` }} />
+                    </div>
+                    <span className="text-xs font-semibold tabular-nums">{capturedPct}%</span>
+                  </div>
+                  <div className="mt-1.5 flex items-center justify-between text-xs text-muted-foreground">
+                    <span className="text-emerald-600 dark:text-emerald-400">{stat.captured} captured</span>
+                    <span className="text-rose-600 dark:text-rose-400">{stat.competitorOwned} lost</span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Detailed table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Tracked SERP Features</CardTitle>
+          <CardDescription>All SERP feature opportunities for this company</CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="max-h-[520px] overflow-y-auto rf-scroll">
+            <Table>
+              <TableHeader className="sticky top-0 bg-card">
+                <TableRow>
+                  <TableHead className="w-[60px]">Type</TableHead>
+                  <TableHead>Keyword</TableHead>
+                  <TableHead>URL</TableHead>
+                  <TableHead className="text-center">Status</TableHead>
+                  <TableHead className="text-right">Updated</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {serpFeatures.map((f) => {
+                  const cfg = serpFeatureConfig[f.type] ?? { icon: Layers, label: f.type, color: "#64748b" };
+                  const Icon = cfg.icon;
+                  return (
+                    <TableRow key={f.id} className="hover:bg-muted/40">
+                      <TableCell>
+                        <TooltipProvider>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <span className="flex h-7 w-7 items-center justify-center rounded-md" style={{ backgroundColor: `${cfg.color}1a`, color: cfg.color }}>
+                                <Icon className="h-3.5 w-3.5" />
+                              </span>
+                            </TooltipTrigger>
+                            <TooltipContent>{cfg.label}</TooltipContent>
+                          </Tooltip>
+                        </TooltipProvider>
+                      </TableCell>
+                      <TableCell className="font-medium text-sm">{f.keyword}</TableCell>
+                      <TableCell className="font-mono text-xs text-muted-foreground truncate max-w-[200px]">{f.url}</TableCell>
+                      <TableCell className="text-center">
+                        {f.competitorOwned ? (
+                          <Badge variant="outline" className="text-rose-600 border-rose-500/30 bg-rose-500/5">Competitor</Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-emerald-600 border-emerald-500/30 bg-emerald-500/5">Captured</Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-right text-xs text-muted-foreground">
+                        {new Date(f.updatedAt).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
       </Card>
     </div>
   );

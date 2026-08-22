@@ -60,12 +60,16 @@ export function Overview({
         <section className="relative overflow-hidden rounded-2xl border bg-card rf-hero-glow p-6 md:p-8">
           <div className="relative z-10">
             <div className="inline-flex items-center gap-1.5 rounded-full border bg-background/60 px-3 py-1 text-xs font-medium text-muted-foreground">
+              <span className="relative flex h-2 w-2">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-emerald-500 rf-pulse-dot" />
+                <span className="relative inline-flex h-2 w-2 rounded-full bg-emerald-500" />
+              </span>
               <Sparkles className="h-3.5 w-3.5 text-primary" />
               Advanced SEO Intelligence · Real-time tracking
             </div>
             <h1 className="mt-4 text-3xl md:text-4xl font-bold tracking-tight">
               The SEO platform that puts your{" "}
-              <span className="bg-gradient-to-r from-emerald-600 to-teal-500 bg-clip-text text-transparent">
+              <span className="rf-gradient-text">
                 brands on top
               </span>
             </h1>
@@ -153,8 +157,10 @@ export function Overview({
               ) : null}
             </div>
             <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-              {d.companies.map((c) => (
-                <CompanyCard key={c.id} company={c} domain={d} />
+              {d.companies.map((c, idx) => (
+                <div key={c.id} className="rf-card-enter" style={{ animationDelay: `${idx * 60}ms` }}>
+                  <CompanyCard company={c} domain={d} />
+                </div>
               ))}
             </div>
           </section>

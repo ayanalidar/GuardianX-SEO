@@ -223,3 +223,33 @@ export function ScoreRadial({ score }: { score: number }) {
     </ResponsiveContainer>
   );
 }
+
+// Core Web Vitals gauge — semicircle gauge with color zones
+export function CwvGauge({ score }: { score: number }) {
+  const color = score >= 75 ? "#10b981" : score >= 50 ? "#f59e0b" : "#ef4444";
+  const label = score >= 75 ? "Good" : score >= 50 ? "Needs Improvement" : "Poor";
+  // semicircle gauge: 180° arc
+  const data = [{ name: "score", value: score, fill: color }];
+  return (
+    <div className="relative">
+      <ResponsiveContainer width="100%" height={160}>
+        <RadialBarChart
+          cx="50%"
+          cy="100%"
+          innerRadius="80%"
+          outerRadius="100%"
+          barSize={16}
+          data={data}
+          startAngle={180}
+          endAngle={180 - (score / 100) * 180}
+        >
+          <RadialBar background={{ fill: "var(--muted)" }} dataKey="value" cornerRadius={10} />
+        </RadialBarChart>
+      </ResponsiveContainer>
+      <div className="absolute inset-x-0 bottom-2 flex flex-col items-center">
+        <span className="text-4xl font-bold tabular-nums" style={{ color }}>{Math.round(score)}</span>
+        <span className="text-xs font-semibold uppercase tracking-wide" style={{ color }}>{label}</span>
+      </div>
+    </div>
+  );
+}

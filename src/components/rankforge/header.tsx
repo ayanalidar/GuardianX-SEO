@@ -1,19 +1,25 @@
 "use client";
 
 import { Button } from "@/components/ui/button";
-import { Search, Sun, Moon, Rocket, Command } from "lucide-react";
+import { Search, Sun, Moon, Rocket, Command, GitCompare } from "lucide-react";
 import { useTheme } from "next-themes";
 import { useNav } from "@/store/nav";
+import { cn } from "@/lib/utils";
 
 export function Header() {
   const { setTheme } = useTheme();
   const setSearchOpen = useNav((s) => s.setSearchOpen);
   const backToOverview = useNav((s) => s.backToOverview);
+  const compareMode = useNav((s) => s.compareMode);
+  const toggleCompareMode = useNav((s) => s.toggleCompareMode);
+  const view = useNav((s) => s.view);
 
   const toggleTheme = () => {
     const isDark = document.documentElement.classList.contains("dark");
     setTheme(isDark ? "light" : "dark");
   };
+
+  const showCompareBtn = view.kind === "overview";
 
   return (
     <header className="sticky top-0 z-40 w-full border-b bg-background/80 backdrop-blur-xl">
@@ -22,7 +28,7 @@ export function Header() {
           onClick={backToOverview}
           className="flex items-center gap-2.5 shrink-0 group"
         >
-          <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25">
+          <span className="relative flex h-9 w-9 items-center justify-center rounded-xl bg-gradient-to-br from-emerald-500 to-teal-600 text-white shadow-lg shadow-emerald-500/25 transition-transform group-hover:scale-105">
             <Rocket className="h-5 w-5" />
           </span>
           <div className="hidden sm:flex flex-col leading-none">
@@ -57,6 +63,21 @@ export function Header() {
         >
           <Search className="h-4 w-4" />
         </Button>
+
+        {showCompareBtn && (
+          <Button
+            variant={compareMode ? "default" : "outline"}
+            size="sm"
+            onClick={toggleCompareMode}
+            className={cn(
+              "gap-1.5 hidden sm:flex",
+              compareMode && "bg-gradient-to-r from-emerald-500 to-teal-600 text-white border-0"
+            )}
+          >
+            <GitCompare className="h-4 w-4" />
+            <span className="hidden lg:inline">Compare</span>
+          </Button>
+        )}
 
         <Button
           variant="ghost"

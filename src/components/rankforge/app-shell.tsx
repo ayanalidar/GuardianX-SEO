@@ -7,6 +7,7 @@ import { DomainTabs } from "./domain-tabs";
 import { Overview } from "./overview";
 import { CompanyDetail } from "./company-detail";
 import { SearchDialog } from "./search-dialog";
+import { CompareView, CompareBar } from "./compare-view";
 import { useNav } from "@/store/nav";
 import { useFetch } from "@/lib/seo/hooks";
 import { DomainWithCompanies } from "@/lib/seo/types";
@@ -26,7 +27,11 @@ export function AppShell() {
     const cId = params.get("c");
     const dSlug = params.get("d");
     const cSlug = params.get("cs");
-    if (cId && cSlug && dSlug) {
+    const cmp = params.get("cmp");
+    if (cmp) {
+      const ids = cmp.split(",").filter(Boolean);
+      if (ids.length >= 2) useNav.getState().openCompare(ids);
+    } else if (cId && cSlug && dSlug) {
       useNav.getState().openCompany(cId, cSlug, dSlug);
     } else if (dSlug) {
       setDomain(dSlug);
@@ -38,10 +43,12 @@ export function AppShell() {
       const params = new URLSearchParams();
       if (view.kind === "overview") {
         if (view.domainSlug) params.set("d", view.domainSlug);
-      } else {
+      } else if (view.kind === "company") {
         params.set("c", view.companyId);
         params.set("cs", view.companySlug);
         params.set("d", view.domainSlug);
+      } else if (view.kind === "compare") {
+        params.set("cmp", view.companyIds.join(","));
       }
       const qs = params.toString();
       const newUrl = qs ? `/?${qs}` : "/";
@@ -51,25 +58,36 @@ export function AppShell() {
   }, [view]);
 
   const activeSlug =
-    view.kind === "overview" ? view.domainSlug : view.domainSlug;
+    view.kind === "overview"
+      ? view.domainSlug
+      : view.kind === "company"
+      ? view.domainSlug
+      : undefined;
+
+  const showTabs = view.kind !== "compare";
 
   return (
     <div className="min-h-screen flex flex-col">
       <Header />
-      <DomainTabs
-        domains={domains}
-        activeSlug={activeSlug}
-        onSelect={(slug) => setDomain(slug === "all" ? "" : slug)}
-      />
+      {showTabs && (
+        <DomainTabs
+          domains={domains}
+          activeSlug={activeSlug}
+          onSelect={(slug) => setDomain(slug === "all" ? "" : slug)}
+        />
+      )}
       <main className="flex-1">
         {view.kind === "overview" ? (
           <Overview domains={domains} activeSlug={activeSlug || "all"} loading={loading} />
-        ) : (
+        ) : view.kind === "company" ? (
           <CompanyDetail companyId={view.companyId} />
+        ) : (
+          <CompareView companyIds={view.companyIds} />
         )}
       </main>
       <Footer />
       <SearchDialog />
+      <CompareBar domains={domains} />
     </div>
   );
 }
