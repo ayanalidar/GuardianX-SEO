@@ -721,3 +721,43 @@ The dynamic route directory `src/app/api/client/[token]/` was missing route hand
 - `whitelabel/route.ts` POST does not persist across server restarts (Client schema lacks a settings column). Add a `whitelabelSettings String?` column to Client and replace the ephemeral return with `db.client.update`.
 - `ab-test/route.ts` uses an in-memory store — promote to a real `AbTest` Prisma model.
 - `pagespeed/route.ts` requires `PAGESPEED_API_KEY` env var for higher quota; without it the public endpoint is rate-limited.
+
+---
+Task ID: GROK-MIGRATION
+Agent: general-purpose sub-agent
+Task: Update all 6 AI API route files to use the unified LLM wrapper (`src/lib/seo/llm.ts`) instead of directly importing `z-ai-web-dev-sdk`, so they route through Grok (xAI) in production with z-ai SDK sandbox fallback.
+
+Work Log:
+- Read the new unified wrapper at `src/lib/seo/llm.ts`. Exports:
+  - `createChatCompletion(messages, options?)` → `{ choices: [{ message: { content } }] }`. Tries Grok (`https://api.x.ai/v1/chat/completions`) first when `GROK_API_KEY`/`XAI_API_KEY` env is set; on Grok error or when no key is present, falls back to the z-ai SDK.
+  - `generateJSON<T>(systemPrompt, userPrompt)` → parsed JSON with `{...}` extraction + throws on non-JSON.
+- Inspected all 6 target routes. All use the same pattern: `const zai = await ZAI.create(); const completion = await zai.chat.completions.create({ messages, thinking: { type: "disabled" } }); const raw = completion.choices[0]?.message?.content ?? "";` followed by `{...}` regex extraction + JSON.parse + try/catch fallback. Because they read `completion.choices[0]?.message?.content` directly, the correct wrapper is `createChatCompletion` (not `generateJSON`) — this preserves each file's existing JSON-extraction and fallback-object logic untouched.
+- Edited all 6 files identically:
+  - Replaced `import ZAI from "z-ai-web-dev-sdk";` with `import { createChatCompletion } from "@/lib/seo/llm";`
+  - Replaced the `ZAI.create()` + `zai.chat.completions.create({ messages, thinking: { type: "disabled" } })` call with `await createChatCompletion([{ role: "assistant", content: systemPrompt }, { role: "user", content: userPrompt }], { thinking: "disabled" })`.
+  - Left validation, DB queries, JSON parsing regex, fallback objects, response formatting, and error handling unchanged.
+
+Files changed (6):
+1. `src/app/api/client/[token]/write-content/route.ts` (import line 3; call site lines 82-89)
+2. `src/app/api/client/[token]/optimize-content/route.ts` (import line 3; call site lines 127-134)
+3. `src/app/api/companies/[id]/insights/route.ts` (import line 3; call site lines 120-127)
+4. `src/app/api/companies/[id]/briefs/route.ts` (import line 3; call site lines 43-50)
+5. `src/app/api/companies/[id]/forecast/route.ts` (import line 3; call site lines 92-99)
+6. `src/app/api/companies/[id]/issues/[issueId]/fix/route.ts` (import line 3; call site lines 41-48)
+
+Verification:
+- `rg "z-ai-web-dev-sdk|ZAI\.create|zai\.chat" src/app/api` → no matches (all direct SDK usage removed from API routes).
+- `rg "z-ai-web-dev-sdk" src` → only one match remaining: `src/lib/seo/llm.ts:4` (the wrapper itself, which is expected).
+- `rg "createChatCompletion" src/app/api` → all 6 files import it on line 3 and call it inside the try block.
+- `bun run lint` → exit code 0, 0 errors, 0 warnings.
+
+Stage Summary:
+- 6 AI route files migrated from direct `z-ai-web-dev-sdk` usage to the unified `createChatCompletion` wrapper.
+- All routes now automatically prefer Grok (xAI) when `GROK_API_KEY`/`XAI_API_KEY` is set in production, and transparently fall back to the z-ai SDK in the sandbox.
+- No changes to route signatures, request/response shapes, validation, DB persistence, or fallback behavior — purely a swap of the LLM client.
+- `generateJSON<T>()` helper from the wrapper remains available but unused by these routes (kept their hand-rolled JSON extraction + fallback objects intact per task instructions).
+
+Next Actions:
+- Set `GROK_API_KEY` (or `XAI_API_KEY`) and optionally `GROK_MODEL` (default `grok-2-latest`) in the deployment environment (Render/Vercel) to enable the Grok path; omit it locally to keep using the z-ai SDK sandbox.
+- Optionally refactor the 6 routes in a follow-up to use `generateJSON<T>()` and drop the duplicated `{...}`-extraction + try/catch blocks, now that the wrapper provides that helper.
+- Smoke-test each endpoint end-to-end (POST with valid params) in both Grok and z-ai fallback configurations to confirm response shapes are unchanged.

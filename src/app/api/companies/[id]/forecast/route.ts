@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import ZAI from "z-ai-web-dev-sdk";
+import { createChatCompletion } from "@/lib/seo/llm";
 
 // POST /api/companies/[id]/forecast — AI-powered SEO forecast
 // Projects traffic, keyword count, and avg position 30/60/90 days ahead
@@ -89,14 +89,13 @@ Return ONLY this JSON:
   };
 
   try {
-    const zai = await ZAI.create();
-    const completion = await zai.chat.completions.create({
-      messages: [
+    const completion = await createChatCompletion(
+      [
         { role: "assistant", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      thinking: { type: "disabled" },
-    });
+      { thinking: "disabled" }
+    );
     const raw = completion.choices[0]?.message?.content ?? "";
     const match = raw.match(/\{[\s\S]*\}/);
     narrative = JSON.parse(match ? match[0] : raw);

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import ZAI from "z-ai-web-dev-sdk";
+import { createChatCompletion } from "@/lib/seo/llm";
 
 // POST /api/client/[token]/optimize-content
 // Body: { targetUrl, targetKeyword }
@@ -124,14 +124,13 @@ Return ONLY this JSON shape:
 Be specific and reference real values from the data. Identify missing or thin sections, keyword stuffing or under-optimization, weak title/meta, missing internal links, missing media, etc.`;
 
   try {
-    const zai = await ZAI.create();
-    const completion = await zai.chat.completions.create({
-      messages: [
+    const completion = await createChatCompletion(
+      [
         { role: "assistant", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      thinking: { type: "disabled" },
-    });
+      { thinking: "disabled" }
+    );
     const raw = completion.choices[0]?.message?.content ?? "";
 
     let parsed: {

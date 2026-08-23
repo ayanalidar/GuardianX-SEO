@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import ZAI from "z-ai-web-dev-sdk";
+import { createChatCompletion } from "@/lib/seo/llm";
 
 // POST /api/companies/[id]/insights
 // Generates AI-powered SEO recommendations based on the company's data
@@ -117,14 +117,13 @@ Return ONLY this JSON shape (no extra text, no code fences):
 Focus on: quick wins, declining metrics, content gaps to capture, technical fixes with highest impact, and competitive positioning. Reference real numbers from the data.`;
 
   try {
-    const zai = await ZAI.create();
-    const completion = await zai.chat.completions.create({
-      messages: [
+    const completion = await createChatCompletion(
+      [
         { role: "assistant", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      thinking: { type: "disabled" },
-    });
+      { thinking: "disabled" }
+    );
 
     const raw = completion.choices[0]?.message?.content ?? "";
 

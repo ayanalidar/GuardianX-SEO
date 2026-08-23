@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/lib/db";
-import ZAI from "z-ai-web-dev-sdk";
+import { createChatCompletion } from "@/lib/seo/llm";
 
 // POST /api/companies/[id]/briefs — generate an AI content brief for a keyword
 export async function POST(
@@ -40,14 +40,13 @@ Return ONLY this JSON shape:
 Make the outline specific and actionable (not generic). Reference real SEO best practices.`;
 
   try {
-    const zai = await ZAI.create();
-    const completion = await zai.chat.completions.create({
-      messages: [
+    const completion = await createChatCompletion(
+      [
         { role: "assistant", content: systemPrompt },
         { role: "user", content: userPrompt },
       ],
-      thinking: { type: "disabled" },
-    });
+      { thinking: "disabled" }
+    );
     const raw = completion.choices[0]?.message?.content ?? "";
 
     let parsed: {
