@@ -131,9 +131,13 @@ export async function GET(
 
   const sp = req.nextUrl.searchParams;
   const overrideUrl = sp.get("url");
-  const targetUrl = (overrideUrl || client.company.website || "").trim();
+  let targetUrl = (overrideUrl || client.company.website || "").trim();
   if (!targetUrl) {
     return NextResponse.json({ error: "No website configured for this client" }, { status: 400 });
+  }
+  // Ensure URL has protocol
+  if (!targetUrl.startsWith("http://") && !targetUrl.startsWith("https://")) {
+    targetUrl = "https://" + targetUrl;
   }
 
   const t0 = Date.now();

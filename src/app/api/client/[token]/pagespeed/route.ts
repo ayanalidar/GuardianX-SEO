@@ -16,7 +16,8 @@ export async function GET(
     return NextResponse.json({ error: "Invalid token" }, { status: 404 });
   }
 
-  const targetUrl = (client.company.website || "").trim();
+  let targetUrl = (client.company.website || "").trim();
+  if (targetUrl && !targetUrl.startsWith("http")) targetUrl = "https://" + targetUrl;
   if (!targetUrl) {
     return NextResponse.json({ error: "No website configured for this client" }, { status: 400 });
   }

@@ -123,7 +123,8 @@ export async function GET(
     return NextResponse.json({ error: "Invalid token" }, { status: 404 });
   }
 
-  const baseUrl = (client.company.website || "").trim();
+  let baseUrl = (client.company.website || "").trim();
+  if (baseUrl && !baseUrl.startsWith("http")) baseUrl = "https://" + baseUrl;
   if (!baseUrl) {
     return NextResponse.json({ error: "No website configured for this client" }, { status: 400 });
   }

@@ -17,7 +17,8 @@ export async function GET(
   }
 
   const companyId = client.companyId;
-  const baseUrl = (client.company.website || "").trim();
+  let baseUrl = (client.company.website || "").trim();
+  if (baseUrl && !baseUrl.startsWith("http")) baseUrl = "https://" + baseUrl;
   if (!baseUrl) {
     return NextResponse.json({ error: "No website configured for this client" }, { status: 400 });
   }
