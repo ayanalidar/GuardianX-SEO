@@ -6,7 +6,37 @@ import { db } from "@/lib/db";
 export async function GET() {
   try {
     // Check if already initialized
-    const existing = await db.domain.count().catch(() => 0);
+    let existing = 0;
+    try {
+      existing = await db.domain.count();
+    } catch {
+      // Table doesn't exist — need to push schema
+      // On Vercel, we can't run prisma CLI, so we use raw SQL to create tables
+      // The schema was pushed during build, but the bundled DB might be read-only
+      // Try creating tables via raw SQL
+      try {
+        await db.$executeRawUnsafe(`CREATE TABLE IF NOT EXISTS "Domain" (
+          "id" TEXT PRIMARY KEY NOT NULL,
+          "name" TEXT NOT NULL UNIQUE,
+          "slug" TEXT NOT NULL UNIQUE,
+          "description" TEXT NOT NULL,
+          "icon" TEXT NOT NULL,
+          "color" TEXT NOT NULL,
+          "accent" TEXT NOT NULL,
+          "createdAt" DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP
+        )`);
+        // If this works, we're on a writable SQLite. Run full schema creation.
+        // For simplicity, if the Domain table creation works, try the rest of the seeding.
+      } catch (schemaErr) {
+        return NextResponse.json({
+          status: "error",
+          error: "Database is read-only or tables can't be created. SQLite doesn't persist on Vercel serverless.",
+          message: "For production, switch to PostgreSQL (Vercel Postgres / Supabase / Neon). SQLite works locally but not on Vercel serverless because the filesystem is read-only at runtime.",
+          solution: "1. Create a free PostgreSQL database at supabase.com or neon.tech\n2. Set DATABASE_URL to the PostgreSQL connection string\n3. Run prisma db push\n4. Redeploy",
+        }, { status: 200 });
+      }
+    }
+
     if (existing > 0) {
       const companies = await db.company.count().catch(() => 0);
       const keywords = await db.keyword.count().catch(() => 0);
