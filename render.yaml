@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: GuardianX-SEO
+    runtime: node
+    plan: free
+    buildCommand: npm install -g bun && bun install && bun run db:generate && next build
+    startCommand: bun run start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SITE_URL
+        sync: false
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
