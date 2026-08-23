@@ -5,6 +5,5 @@
     "src/app/api/**": {
       "maxDuration": 60
     }
-  },
-  "includeFiles": ["db/**"]
+  }
 }
