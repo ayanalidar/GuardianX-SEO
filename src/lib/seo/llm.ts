@@ -1,5 +1,5 @@
-// Unified LLM wrapper — uses Grok (xAI) API in production, z-ai SDK in sandbox
-// Grok API is OpenAI-compatible: https://api.x.ai/v1/chat/completions
+// Unified LLM wrapper — uses Groq API in production, z-ai SDK in sandbox fallback
+// Groq is OpenAI-compatible: https://api.groq.com/openai/v1/chat/completions
 
 import ZAI from "z-ai-web-dev-sdk";
 
@@ -14,39 +14,39 @@ type ChatCompletion = {
   }>;
 };
 
-const GROK_API_KEY = process.env.GROK_API_KEY || process.env.XAI_API_KEY || "";
-const GROK_MODEL = process.env.GROK_MODEL || "grok-2-latest";
-const GROK_BASE_URL = "https://api.x.ai/v1/chat/completions";
+const GROQ_API_KEY = process.env.GROQ_API_KEY || process.env.GROG_API_KEY || "";
+const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
+const GROQ_BASE_URL = "https://api.groq.com/openai/v1/chat/completions";
 
 /**
- * Create a chat completion using Grok API (production) or z-ai SDK (sandbox fallback)
+ * Create a chat completion using Groq API (production) or z-ai SDK (sandbox fallback)
  */
 export async function createChatCompletion(
   messages: ChatMessage[],
   options?: { thinking?: "enabled" | "disabled" }
 ): Promise<ChatCompletion> {
-  // Try Grok first (works on Render/Vercel/any host)
-  if (GROK_API_KEY) {
+  // Try Groq first (works on Render/Vercel/any host)
+  if (GROQ_API_KEY) {
     try {
-      const res = await fetch(GROK_BASE_URL, {
+      const res = await fetch(GROQ_BASE_URL, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${GROK_API_KEY}`,
+          Authorization: `Bearer ${GROQ_API_KEY}`,
         },
         body: JSON.stringify({
-          model: GROK_MODEL,
+          model: GROQ_MODEL,
           messages,
           temperature: 0.7,
-          max_tokens: 4096,
+          max_tokens: 8000,
         }),
-        signal: AbortSignal.timeout(55000), // 55s timeout
+        signal: AbortSignal.timeout(55000),
       });
 
       if (!res.ok) {
         const errText = await res.text();
-        console.error("[LLM] Grok API error:", res.status, errText.slice(0, 200));
-        throw new Error(`Grok API returned ${res.status}`);
+        console.error("[LLM] Groq API error:", res.status, errText.slice(0, 200));
+        throw new Error(`Groq API returned ${res.status}`);
       }
 
       const data = await res.json();
@@ -56,7 +56,7 @@ export async function createChatCompletion(
         choices: [{ message: { content } }],
       };
     } catch (err) {
-      console.error("[LLM] Grok failed, falling back to z-ai:", err instanceof Error ? err.message : "unknown");
+      console.error("[LLM] Groq failed, falling back to z-ai:", err instanceof Error ? err.message : "unknown");
       // Fall through to z-ai
     }
   }
