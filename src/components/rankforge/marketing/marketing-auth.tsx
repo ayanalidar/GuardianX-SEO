@@ -7,36 +7,57 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useToast } from "@/hooks/use-toast";
+import { useNav } from "@/store/nav";
 import {
-  Rocket, Mail, Lock, User, ArrowRight, ArrowLeft, Sparkles,
-  Check, TrendingUp, Shield, Bot,
+  Rocket, Mail, Lock, ArrowRight, ArrowLeft, Check,
+  TrendingUp, Shield, Bot, User, Crown, AlertCircle, Loader2,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export function MarketingAuth({
-  onSuccess,
-  onOnboard,
-}: {
-  onSuccess: () => void;
-  onOnboard: () => void;
-}) {
+export function MarketingAuth({ onSuccess }: { onSuccess: () => void }) {
   const [mode, setMode] = useState<"login" | "signup">("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const { toast } = useToast();
-  const [submitting, setSubmitting] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitting(true);
-    setTimeout(() => {
-      setSubmitting(false);
-      toast({
-        title: mode === "login" ? "Welcome back!" : "Account created!",
-        description: mode === "login"
-          ? "Entering your SEO command center."
-          : "Your RankForge account is ready. Launch the dashboard.",
+    setLoading(true);
+    setError(null);
+
+    try {
+      const r = await fetch("/api/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
       });
+
+      const j = await r.json();
+
+      if (!r.ok) {
+        setError(j.error || "Login failed");
+        setLoading(false);
+        return;
+      }
+
+      // Route based on role
+      if (j.role === "admin") {
+        useNav.getState().loginAsAdmin();
+        toast({ title: "Welcome, Admin!", description: "Full dashboard access." });
+      } else if (j.role === "client") {
+        useNav.getState().loginAsClient(j.companyId, j.token, j.name);
+        toast({ title: `Welcome, ${j.name}!`, description: "Your SEO dashboard is ready." });
+      }
       onSuccess();
-    }, 900);
+    } catch {
+      setError("Network error. Please try again.");
+      setLoading(false);
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,8 +72,8 @@ export function MarketingAuth({
               animate={{ opacity: 1, y: 0 }}
               className="inline-flex items-center gap-1.5 rounded-full border bg-background/60 px-3 py-1 text-xs font-medium text-muted-foreground"
             >
-              <Sparkles className="h-3.5 w-3.5 text-primary" />
-              {mode === "login" ? "Welcome back" : "Join RankForge"}
+              <Check className="h-3.5 w-3.5 text-primary" />
+              {mode === "login" ? "Welcome back" : "Join GuardianX-SEO"}
             </motion.div>
             <motion.h1
               initial={{ opacity: 0, y: 20 }}
@@ -70,16 +91,16 @@ export function MarketingAuth({
               transition={{ delay: 0.2 }}
               className="mt-4 text-muted-foreground leading-relaxed"
             >
-              Access the most advanced SEO platform. Track rankings, audit technical SEO,
-              analyze backlinks, and get AI-powered recommendations — all in one place.
+              Login to access your personalized SEO dashboard with real-time rankings,
+              AI-powered insights, and your dedicated action roadmap.
             </motion.p>
 
             <div className="mt-8 space-y-3">
               {[
-                { icon: TrendingUp, text: "Real-time rank tracking across 50 companies" },
-                { icon: Shield, text: "600+ technical SEO issue detection" },
-                { icon: Bot, text: "AI-powered, data-driven recommendations" },
-                { icon: Rocket, text: "Unique client portal for every business" },
+                { icon: TrendingUp, text: "Real-time rank tracking & live visitor analytics" },
+                { icon: Shield, text: "600+ technical SEO issue detection with AI fixes" },
+                { icon: Bot, text: "AI-powered recommendations & content optimization" },
+                { icon: Rocket, text: "Unique client portal with ROI tracking" },
               ].map((f, i) => {
                 const Icon = f.icon;
                 return (
@@ -98,6 +119,34 @@ export function MarketingAuth({
                 );
               })}
             </div>
+
+            {/* Role explainer */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.7 }}
+              className="mt-8 rounded-xl border bg-background/40 p-4"
+            >
+              <div className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
+                Two access levels
+              </div>
+              <div className="space-y-2">
+                <div className="flex items-start gap-2 text-xs">
+                  <Crown className="h-4 w-4 text-amber-500 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold">Admin</span>
+                    <span className="text-muted-foreground"> — full dashboard, all companies, client onboarding</span>
+                  </div>
+                </div>
+                <div className="flex items-start gap-2 text-xs">
+                  <User className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-semibold">Client</span>
+                    <span className="text-muted-foreground"> — your company dashboard only, no access to other accounts</span>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
           </div>
 
           {/* Right: auth form */}
@@ -113,7 +162,7 @@ export function MarketingAuth({
                 {(["login", "signup"] as const).map((m) => (
                   <button
                     key={m}
-                    onClick={() => setMode(m)}
+                    onClick={() => { setMode(m); setError(null); }}
                     className={cn(
                       "flex-1 rounded-lg py-2 text-sm font-semibold transition-all",
                       mode === m ? "bg-background text-foreground shadow-sm" : "text-muted-foreground hover:text-foreground"
@@ -129,12 +178,19 @@ export function MarketingAuth({
                   <Rocket className="h-5 w-5" />
                 </span>
                 <div>
-                  <div className="font-bold">RankForge SEO</div>
+                  <div className="font-bold">GuardianX-SEO</div>
                   <div className="text-xs text-muted-foreground">
                     {mode === "login" ? "Sign in to your account" : "Create your free account"}
                   </div>
                 </div>
               </div>
+
+              {error && (
+                <div className="mb-4 rounded-lg border border-rose-500/30 bg-rose-500/5 p-3 text-sm text-rose-600 dark:text-rose-400 flex items-start gap-2">
+                  <AlertCircle className="h-4 w-4 shrink-0 mt-0.5" />
+                  <span>{error}</span>
+                </div>
+              )}
 
               <AnimatePresence mode="wait">
                 <motion.form
@@ -150,7 +206,7 @@ export function MarketingAuth({
                       <Label className="text-xs font-medium text-muted-foreground">Full name</Label>
                       <div className="relative">
                         <User className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                        <Input required className="pl-9" placeholder="Jane Doe" />
+                        <Input required className="pl-9" placeholder="Jane Doe" value={name} onChange={(e) => setName(e.target.value)} />
                       </div>
                     </div>
                   )}
@@ -158,14 +214,14 @@ export function MarketingAuth({
                     <Label className="text-xs font-medium text-muted-foreground">Email</Label>
                     <div className="relative">
                       <Mail className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input type="email" required className="pl-9" placeholder="you@company.com" />
+                      <Input type="email" required className="pl-9" placeholder="you@company.com" value={email} onChange={(e) => setEmail(e.target.value)} />
                     </div>
                   </div>
                   <div className="space-y-1.5">
                     <Label className="text-xs font-medium text-muted-foreground">Password</Label>
                     <div className="relative">
                       <Lock className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                      <Input type="password" required className="pl-9" placeholder="••••••••" />
+                      <Input type="password" required className="pl-9" placeholder="••••••••" value={password} onChange={(e) => setPassword(e.target.value)} />
                     </div>
                   </div>
 
@@ -182,21 +238,17 @@ export function MarketingAuth({
 
                   <Button
                     type="submit"
-                    disabled={submitting}
+                    disabled={loading}
                     className="w-full bg-gradient-to-r from-emerald-500 to-teal-600 text-white gap-1.5 h-11"
                   >
-                    {submitting ? (
+                    {loading ? (
                       <>
-                        <motion.span
-                          animate={{ rotate: 360 }}
-                          transition={{ duration: 0.8, repeat: Infinity, ease: "linear" }}
-                          className="inline-block h-4 w-4 border-2 border-white/30 border-t-white rounded-full"
-                        />
-                        {mode === "login" ? "Signing in…" : "Creating account…"}
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                        Signing in…
                       </>
                     ) : (
                       <>
-                        {mode === "login" ? "Sign in" : "Create account"}
+                        {mode === "login" ? "Login to Dashboard" : "Create account"}
                         <ArrowRight className="h-4 w-4" />
                       </>
                     )}
@@ -206,8 +258,7 @@ export function MarketingAuth({
                     <div className="rounded-lg bg-muted/40 p-3 text-xs text-muted-foreground flex items-start gap-2">
                       <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
                       <span>
-                        After signup, launch the dashboard and onboard your first client to
-                        generate a unique portal link in 60 seconds.
+                        After signup, you&apos;ll land directly in your SEO dashboard.
                       </span>
                     </div>
                   )}
@@ -221,18 +272,10 @@ export function MarketingAuth({
                 <div className="flex-1 h-px bg-border" />
               </div>
 
-              <button
-                onClick={onOnboard}
-                className="w-full inline-flex items-center justify-center gap-1.5 rounded-lg border py-2.5 text-sm font-medium hover:bg-muted transition-colors"
-              >
-                <Sparkles className="h-4 w-4 text-primary" />
-                Onboard a client instead
-              </button>
-
-              <div className="mt-4 text-center text-xs text-muted-foreground">
+              <div className="text-center text-xs text-muted-foreground">
                 {mode === "login" ? "Don't have an account? " : "Already have an account? "}
                 <button
-                  onClick={() => setMode(mode === "login" ? "signup" : "login")}
+                  onClick={() => { setMode(mode === "login" ? "signup" : "login"); setError(null); }}
                   className="text-primary font-medium hover:underline"
                 >
                   {mode === "login" ? "Sign up free" : "Sign in"}
