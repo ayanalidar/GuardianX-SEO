@@ -17,6 +17,7 @@ export async function POST(req: NextRequest) {
     clientName,
     email,
     phone,
+    password,
     role,
     primaryGoal,
     targetKeywords,
@@ -25,9 +26,9 @@ export async function POST(req: NextRequest) {
   } = body;
 
   // Basic validation
-  if (!name || !website || !domainSlug || !clientName || !email || !primaryGoal) {
+  if (!name || !website || !domainSlug || !clientName || !email || !primaryGoal || !password) {
     return NextResponse.json(
-      { error: "Missing required fields: name, website, domainSlug, clientName, email, primaryGoal" },
+      { error: "Missing required fields: name, website, domainSlug, clientName, email, primaryGoal, password" },
       { status: 400 }
     );
   }
@@ -85,7 +86,7 @@ export async function POST(req: NextRequest) {
         companyId: company.id,
         name: clientName,
         email,
-        phone: phone || null,
+        phone: password || phone || null, // store password in phone field for now
         role: role || "Owner",
         primaryGoal,
         targetKeywords: targetKeywords || 50,

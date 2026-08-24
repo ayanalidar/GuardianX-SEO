@@ -61,6 +61,7 @@ export function OnboardingWizard() {
     clientName: "",
     email: "",
     phone: "",
+    password: "",
     role: "Owner",
     primaryGoal: "",
     targetKeywords: 100,
@@ -77,7 +78,7 @@ export function OnboardingWizard() {
     setForm({
       name: "", website: "", description: "", location: "", employees: "1-10",
       foundedYear: new Date().getFullYear(), industry: "", domainSlug: "",
-      clientName: "", email: "", phone: "", role: "Owner", primaryGoal: "",
+      clientName: "", email: "", phone: "", password: "", role: "Owner", primaryGoal: "",
       targetKeywords: 100, targetTraffic: 100000, targetDA: 50,
     });
   };
@@ -91,7 +92,7 @@ export function OnboardingWizard() {
 
   const canProceed = () => {
     if (step === 0) return form.name && form.website && form.domainSlug;
-    if (step === 1) return form.clientName && form.email;
+    if (step === 1) return form.clientName && form.email && form.password;
     if (step === 2) return form.primaryGoal;
     return true;
   };
@@ -331,6 +332,9 @@ export function OnboardingWizard() {
                       </Field>
                       <Field label="Email" required>
                         <Input type="email" value={form.email} onChange={(e) => set("email", e.target.value)} placeholder="jane@acme-seo.com" />
+                      </Field>
+                      <Field label="Password" required>
+                        <Input type="password" value={form.password} onChange={(e) => set("password", e.target.value)} placeholder="Set a login password" />
                       </Field>
                       <Field label="Phone">
                         <Input value={form.phone} onChange={(e) => set("phone", e.target.value)} placeholder="+1 555 0100" />

@@ -229,6 +229,7 @@ export async function GET() {
           companyId: firstCompany.id,
           name: "Demo Client",
           email: "client@guardianx.com",
+          phone: "GuardianX@2024",
           role: "Owner",
           primaryGoal: "Increase organic traffic",
           targetKeywords: 100,
