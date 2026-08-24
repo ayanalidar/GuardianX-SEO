@@ -1,5 +1,6 @@
-// Unified LLM wrapper — uses Groq API in production, z-ai SDK in sandbox fallback
-// Groq is OpenAI-compatible: https://api.groq.com/openai/v1/chat/completions
+// Unified LLM wrapper — multi-provider with automatic fallback
+// Supports: Cerebras (fastest), OpenRouter (free models), z-ai SDK (sandbox)
+// All providers use OpenAI-compatible API format
 
 import ZAI from "z-ai-web-dev-sdk";
 
@@ -14,54 +15,77 @@ type ChatCompletion = {
   }>;
 };
 
-const GROQ_API_KEY = process.env.GROQ_API_KEY || process.env.GROG_API_KEY || "";
-const GROQ_MODEL = process.env.GROQ_MODEL || "llama-3.3-70b-versatile";
-const GROQ_BASE_URL = "https://api.groq.com/openai/v1/chat/completions";
+// Provider configs
+const CEREBRAS_KEY = process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY || "";
+const CEREBRAS_URL = "https://api.cerebras.ai/v1/chat/completions";
+const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || "llama-3.3-70b";
+
+const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || "";
+const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
+const OPENROUTER_MODEL = process.env.OPENROUTER_MODEL || "meta-llama/llama-3.3-70b-instruct:free";
+
+async function callOpenAICompatible(
+  url: string,
+  apiKey: string,
+  model: string,
+  messages: ChatMessage[],
+  timeoutMs: number = 55000
+): Promise<string> {
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      Authorization: `Bearer ${apiKey}`,
+      ...(url.includes("openrouter") ? { "HTTP-Referer": "https://guardianx-seo.com", "X-Title": "GuardianX-SEO" } : {}),
+    },
+    body: JSON.stringify({
+      model,
+      messages,
+      temperature: 0.7,
+      max_tokens: 8000,
+    }),
+    signal: AbortSignal.timeout(timeoutMs),
+  });
+
+  if (!res.ok) {
+    const errText = await res.text();
+    console.error(`[LLM] API error from ${url}:`, res.status, errText.slice(0, 200));
+    throw new Error(`API returned ${res.status}`);
+  }
+
+  const data = await res.json();
+  return data.choices?.[0]?.message?.content ?? "";
+}
 
 /**
- * Create a chat completion using Groq API (production) or z-ai SDK (sandbox fallback)
+ * Create a chat completion using multiple providers with fallback
+ * Order: Cerebras → OpenRouter → z-ai SDK (sandbox)
  */
 export async function createChatCompletion(
   messages: ChatMessage[],
   options?: { thinking?: "enabled" | "disabled" }
 ): Promise<ChatCompletion> {
-  // Try Groq first (works on Render/Vercel/any host)
-  if (GROQ_API_KEY) {
+  // 1. Try Cerebras (super fast, Llama 3.3 70B)
+  if (CEREBRAS_KEY) {
     try {
-      const res = await fetch(GROQ_BASE_URL, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: GROQ_MODEL,
-          messages,
-          temperature: 0.7,
-          max_tokens: 8000,
-        }),
-        signal: AbortSignal.timeout(55000),
-      });
-
-      if (!res.ok) {
-        const errText = await res.text();
-        console.error("[LLM] Groq API error:", res.status, errText.slice(0, 200));
-        throw new Error(`Groq API returned ${res.status}`);
-      }
-
-      const data = await res.json();
-      const content = data.choices?.[0]?.message?.content ?? "";
-
-      return {
-        choices: [{ message: { content } }],
-      };
+      const content = await callOpenAICompatible(CEREBRAS_URL, CEREBRAS_KEY, CEREBRAS_MODEL, messages);
+      return { choices: [{ message: { content } }] };
     } catch (err) {
-      console.error("[LLM] Groq failed, falling back to z-ai:", err instanceof Error ? err.message : "unknown");
-      // Fall through to z-ai
+      console.error("[LLM] Cerebras failed:", err instanceof Error ? err.message : "unknown");
     }
   }
 
-  // Fallback: z-ai SDK (works in Z.ai sandbox only)
+  // 2. Try OpenRouter (free models, works from any IP)
+  if (OPENROUTER_KEY) {
+    try {
+      const content = await callOpenAICompatible(OPENROUTER_URL, OPENROUTER_KEY, OPENROUTER_MODEL, messages);
+      return { choices: [{ message: { content } }] };
+    } catch (err) {
+      console.error("[LLM] OpenRouter failed:", err instanceof Error ? err.message : "unknown");
+    }
+  }
+
+  // 3. Fallback: z-ai SDK (works in Z.ai sandbox only)
   const zai = await ZAI.create();
   const completion = await zai.chat.completions.create({
     messages,
@@ -69,13 +93,7 @@ export async function createChatCompletion(
   });
 
   return {
-    choices: [
-      {
-        message: {
-          content: completion.choices[0]?.message?.content ?? "",
-        },
-      },
-    ],
+    choices: [{ message: { content: completion.choices[0]?.message?.content ?? "" } }],
   };
 }
 
@@ -93,7 +111,6 @@ export async function generateJSON<T>(
 
   const raw = completion.choices[0]?.message?.content ?? "";
 
-  // Try to extract JSON from the response
   try {
     const match = raw.match(/\{[\s\S]*\}/);
     return JSON.parse(match ? match[0] : raw);
