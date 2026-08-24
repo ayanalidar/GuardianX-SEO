@@ -1,20 +1,39 @@
 import { NextResponse } from "next/server";
-import { createChatCompletion } from "@/lib/seo/llm";
 
 export async function GET() {
+  const key = process.env.GEMINI_API_KEY || "";
+  const model = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+  
+  // Test Gemini directly
   try {
-    const completion = await createChatCompletion([
-      { role: "user", content: "Say hello in exactly 5 words." },
-    ]);
-    const response = completion.choices[0]?.message?.content ?? "";
-    return NextResponse.json({ success: true, response: response.slice(0, 200) });
+    const res = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${key}`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          contents: [{ role: "user", parts: [{ text: "Say hello in 5 words" }] }],
+          generationConfig: { maxOutputTokens: 50 },
+        }),
+        signal: AbortSignal.timeout(15000),
+      }
+    );
+    
+    const status = res.status;
+    const text = await res.text();
+    
+    return NextResponse.json({
+      geminiKey: key.slice(0, 20),
+      model,
+      status,
+      response: text.slice(0, 500),
+      success: status === 200,
+    });
   } catch (err) {
     return NextResponse.json({
-      success: false,
       error: err instanceof Error ? err.message : "unknown",
-      geminiKey: (process.env.GEMINI_API_KEY || "").slice(0, 15),
-      geminiModel: process.env.GEMINI_MODEL || "default",
-      cerebrasKey: (process.env.CEREBRAS_API_KEY || "").slice(0, 15),
+      geminiKey: key.slice(0, 20),
+      model,
     });
   }
 }
