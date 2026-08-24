@@ -18,7 +18,7 @@ type ChatCompletion = {
 // Provider configs
 const CEREBRAS_KEY = process.env.CEREBRAS_API_KEY || process.env.GROQ_API_KEY || "";
 const CEREBRAS_URL = "https://api.cerebras.ai/v1/chat/completions";
-const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || "llama-3.3-70b";
+const CEREBRAS_MODEL = process.env.CEREBRAS_MODEL || "gpt-oss-120b";
 
 const OPENROUTER_KEY = process.env.OPENROUTER_API_KEY || "";
 const OPENROUTER_URL = "https://openrouter.ai/api/v1/chat/completions";
