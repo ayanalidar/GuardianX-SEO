@@ -1,20 +1,9 @@
 {
-  "buildCommand": "prisma generate && prisma db push --accept-data-loss && next build",
+  "buildCommand": "rm -f .env && prisma generate && prisma db push --accept-data-loss && next build",
   "framework": "nextjs",
   "functions": {
-    "src/app/api/client/[token]/crawl/route.ts": { "maxDuration": 60 },
-    "src/app/api/client/[token]/multicrawl/route.ts": { "maxDuration": 60 },
-    "src/app/api/client/[token]/daily-crawl/route.ts": { "maxDuration": 60 },
-    "src/app/api/client/[token]/pagespeed/route.ts": { "maxDuration": 60 },
-    "src/app/api/client/[token]/write-content/route.ts": { "maxDuration": 60 },
-    "src/app/api/client/[token]/optimize-content/route.ts": { "maxDuration": 60 },
-    "src/app/api/client/[token]/briefs/route.ts": { "maxDuration": 60 },
-    "src/app/api/companies/[id]/briefs/route.ts": { "maxDuration": 60 },
-    "src/app/api/companies/[id]/forecast/route.ts": { "maxDuration": 60 },
-    "src/app/api/companies/[id]/insights/route.ts": { "maxDuration": 60 },
-    "src/app/api/companies/[id]/issues/[issueId]/fix/route.ts": { "maxDuration": 60 },
-    "src/app/api/onboard/route.ts": { "maxDuration": 60 },
-    "src/app/api/client/[token]/multicrawl/route.ts": { "maxDuration": 60 },
-    "src/app/api/**": { "maxDuration": 30 }
+    "src/app/api/**": {
+      "maxDuration": 60
+    }
   }
 }
