@@ -1,5 +1,5 @@
 {
-  "buildCommand": "rm -f .env && npm install && npx prisma generate && DATABASE_URL=postgresql://neondb_owner:npg_Kip5kUXVwde6@ep-curly-glade-azd7ps5i-pooler.c-3.ap-southeast-1.aws.neon.tech/neondb?sslmode=require npx prisma db push --accept-data-loss && npx next build",
+  "buildCommand": "rm -f .env && npm install && npx prisma generate && npx prisma db push --accept-data-loss && npx next build",
   "framework": "nextjs",
   "functions": {
     "src/app/api/**": {
