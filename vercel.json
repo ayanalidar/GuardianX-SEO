@@ -1,4 +1,6 @@
 {
+  "installCommand": "bun install",
+  "buildCommand": "bun run db:generate && next build",
   "framework": "nextjs",
   "functions": {
     "src/app/api/**": {
