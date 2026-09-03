@@ -10,6 +10,15 @@ import {
 } from "@/components/rankforge/motion";
 import { CompetitiveRadar } from "./features/competitive-radar";
 import { SeoForecast } from "./features/seo-forecast";
+import { IntegrationGuide } from "./integration-guide";
+import { LiveSiteAudit } from "./features/live-site-audit";
+import { RoiCalculator } from "./features/roi-calculator";
+import { ActionRoadmap } from "./features/action-roadmap";
+import { AutoFixGenerator } from "./features/auto-fix-generator";
+import { MultiPageCrawler } from "./features/multi-page-crawler";
+import { ContentOptimizer } from "./features/content-optimizer";
+import { AdvancedTools } from "./features/advanced-tools";
+import { AutoOptimizer } from "./features/auto-optimizer";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -445,6 +454,51 @@ export function ClientPortal({ token }: { token: string }) {
         {/* AI Forecast */}
         <Reveal>
           <SeoForecast companyId={company.id} />
+        </Reveal>
+
+        {/* 🚀 Auto-Optimizer — THE killer feature */}
+        <Reveal>
+          <AutoOptimizer token={token} />
+        </Reveal>
+
+        {/* Website Integration Guide */}
+        <Reveal>
+          <IntegrationGuide token={token} />
+        </Reveal>
+
+        {/* Live Site Audit (real crawl) */}
+        <Reveal>
+          <LiveSiteAudit token={token} />
+        </Reveal>
+
+        {/* ROI Calculator */}
+        <Reveal>
+          <RoiCalculator token={token} />
+        </Reveal>
+
+        {/* 4-Week Action Roadmap */}
+        <Reveal>
+          <ActionRoadmap token={token} />
+        </Reveal>
+
+        {/* Auto-Fix Generator (copy-paste code snippets) */}
+        <Reveal>
+          <AutoFixGenerator token={token} />
+        </Reveal>
+
+        {/* Multi-Page Crawler */}
+        <Reveal>
+          <MultiPageCrawler token={token} />
+        </Reveal>
+
+        {/* Content Optimizer (AI) */}
+        <Reveal>
+          <ContentOptimizer token={token} />
+        </Reveal>
+
+        {/* Advanced SEO Tools (7 tabs) */}
+        <Reveal>
+          <AdvancedTools token={token} />
         </Reveal>
 
         {/* Quick stats footer */}
