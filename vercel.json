@@ -1,5 +1,5 @@
 {
-  "buildCommand": "rm -f .env && npm install && npx prisma generate && npx next build",
+  "buildCommand": "rm -f .env && npm install && npx next build",
   "framework": "nextjs",
   "functions": {
     "src/app/api/**": {
